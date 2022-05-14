@@ -1,0 +1,8 @@
+@use '../styles/_variables' as var;
+
+.home {
+  h1 {
+    text-align: center;
+    margin-bottom: var.$spacing * 5;
+  }
+}

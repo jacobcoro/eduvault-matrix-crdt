@@ -10,9 +10,11 @@
     "test": "jest --watch"
   },
   "dependencies": {
+    "@syncedstore/react": "^0.3.9",
+    "matrix-crdt": "^0.0.5",
     "next": "12.1.6",
-    "react": "18.1.0",
-    "react-dom": "18.1.0"
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.4",
@@ -25,6 +27,7 @@
     "eslint-config-prettier": "^8.5.0",
     "jest": "^28.1.0",
     "jest-environment-jsdom": "^28.1.0",
+    "sass": "^1.51.0",
     "typescript": "^4.6.4"
   }
 }

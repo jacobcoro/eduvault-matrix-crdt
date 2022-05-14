@@ -1,0 +1,25 @@
+@import './variables.module.scss';
+
+@mixin card {
+  border-radius: 8px;
+  background-color: var(--paper);
+  box-shadow: var(--shadow);
+}
+@mixin container {
+  max-width: 1080px;
+  padding: $spacing * 1;
+  @media screen and (min-width: 480px) {
+    padding: $spacing * 2;
+  }
+
+  margin: auto;
+}
+
+@mixin login-form {
+  @include card;
+  text-align: center;
+  width: 500px;
+  margin: auto;
+  margin-top: $spacing * 4;
+  padding: $spacing * 4;
+}

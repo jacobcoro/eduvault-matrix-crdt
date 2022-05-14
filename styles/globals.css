@@ -1,16 +1,37 @@
-html,
-body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
+@import './reset.css';
+@import './color-theme.css';
 
 * {
-  box-sizing: border-box;
+  color: var(--text);
+}
+
+#app-root {
+  padding-top: 50px;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg);
+  overflow: auto;
+}
+
+button {
+  background-color: var(--primary);
+  color: white;
+  padding: 8 * 1px;
+  padding-left: 8 * 2px;
+  padding-right: 8 * 2px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: var(--grey-med);
+  cursor: not-allowed;
+}
+
+input {
+  background-color: var(--bg);
+  background-image: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
 }
