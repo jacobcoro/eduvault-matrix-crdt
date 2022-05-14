@@ -4,16 +4,18 @@ import Link from 'next/link';
 const NavBar = () => {
   const { toggleTheme } = useTheme();
   return (
-    <div className={styles.navbar}>
-      <button onClick={() => toggleTheme()}>toggle theme</button>
-      <ul className="links" role="navigation">
-        <li>
-          <Link href="/login">Login</Link>
-        </li>
-        <li>
-          <Link href="/">Home</Link>{' '}
-        </li>
-      </ul>
+    <div className={styles.root}>
+      <nav>
+        <button onClick={() => toggleTheme()}>toggle theme</button>
+        <ul className="links" role="navigation">
+          <li>
+            <Link href="/login">Login</Link>
+          </li>
+          <li>
+            <Link href="/">Home</Link>{' '}
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 };

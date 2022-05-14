@@ -1,6 +1,7 @@
 @use '../styles/_variables' as vars;
 @use '../styles/_mixins' as mixins;
-.home {
+
+.root {
   @include mixins.container;
   h1 {
     text-align: center;

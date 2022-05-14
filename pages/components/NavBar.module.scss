@@ -1,11 +1,16 @@
 @use '../../styles/variables' as vars;
+@use '../../styles/mixins' as mixins;
 
-.navbar {
+.root {
   position: absolute;
   top: 0;
   width: 100%;
   background-color: var(--paper);
-  display: flex;
+
+  nav {
+    @include mixins.container;
+    display: flex;
+  }
 
   ul {
     list-style: none;

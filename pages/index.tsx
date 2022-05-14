@@ -1,10 +1,9 @@
 import Head from 'next/head';
-import Image from 'next/image';
 import styles from './index.module.scss';
 
 export default function Home() {
   return (
-    <div className={styles.home}>
+    <div className={styles.root}>
       <Head>
         <title>Eduvault Matrix CRDT</title>
         <meta name="description" content="User-owned and Local-first" />
