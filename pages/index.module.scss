@@ -1,8 +1,9 @@
-@use '../styles/_variables' as var;
-
+@use '../styles/_variables' as vars;
+@use '../styles/_mixins' as mixins;
 .home {
+  @include mixins.container;
   h1 {
     text-align: center;
-    margin-bottom: var.$spacing * 5;
+    margin-bottom: vars.$spacing * 5;
   }
 }

@@ -1,4 +1,4 @@
-@import './variables.module.scss';
+@use 'variables' as vars;
 
 @mixin card {
   border-radius: 8px;
@@ -7,9 +7,9 @@
 }
 @mixin container {
   max-width: 1080px;
-  padding: $spacing * 1;
+  padding: vars.$spacing * 1;
   @media screen and (min-width: 480px) {
-    padding: $spacing * 2;
+    padding: vars.$spacing * 2;
   }
 
   margin: auto;
@@ -20,6 +20,6 @@
   text-align: center;
   width: 500px;
   margin: auto;
-  margin-top: $spacing * 4;
-  padding: $spacing * 4;
+  margin-top: vars.$spacing * 4;
+  padding: vars.$spacing * 4;
 }
