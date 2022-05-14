@@ -1,6 +1,19 @@
+@use '../../styles/variables' as vars;
+
 .navbar {
   position: absolute;
   top: 0;
   width: 100%;
   background-color: var(--paper);
+  display: flex;
+
+  ul {
+    list-style: none;
+    margin-left: auto;
+    display: flex;
+    justify-content: space-between;
+  }
+  li {
+    margin-right: vars.$spacing * 4;
+  }
 }
