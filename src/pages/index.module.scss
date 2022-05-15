@@ -1,5 +1,5 @@
-@use '../styles/_variables' as vars;
-@use '../styles/_mixins' as mixins;
+@use 'styles/_variables' as vars;
+@use 'styles/_mixins' as mixins;
 
 .root {
   @include mixins.container;
