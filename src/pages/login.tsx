@@ -8,6 +8,8 @@ import {
   TEST_ROOM_ID,
 } from 'config';
 import { useRouter } from 'next/router';
+import LoginForm from 'components/LoginForm';
+import { LoginData } from 'model/utils';
 
 const Login = () => {
   const [loginStatus, setLoginStatus] = useState<LoginStatus>('initial');
@@ -16,27 +18,27 @@ const Login = () => {
     if (status === 'ok') router.push('/app');
   };
   const router = useRouter();
-  const { store, login, matrixClient } = useContext(StoreContext);
-  const loginData = {
+  const { login } = useContext(StoreContext);
+  const initialLoginData: LoginData = {
+    // TODO: create room
     server: MATRIX_SERVER,
-    user: DEV_USERNAME,
+    user: DEV_USERNAME, // these will be empty in prod. This speeds up dev time
     password: DEV_PASSWORD,
     roomAlias: TEST_ROOM_ID,
+  };
+  const [loginData, setLoginData] = useState(initialLoginData);
+  const handleLogin = () => {
+    login(loginData, onSetLoginStatus as any);
   };
   return (
     <div className={styles.root}>
       <h1>Login</h1>
-
-      <div>
-        <button
-          onClick={() => {
-            login(loginData, onSetLoginStatus as any);
-          }}
-        >
-          Login
-        </button>
-        <p>status: {JSON.stringify(loginStatus)}</p>
-      </div>
+      <LoginForm
+        handleLogin={handleLogin}
+        loginStatus={loginStatus}
+        loginData={loginData}
+        setLoginData={setLoginData}
+      />
     </div>
   );
 };

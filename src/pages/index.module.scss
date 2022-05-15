@@ -5,6 +5,6 @@
   @include mixins.container;
   h1 {
     text-align: center;
-    margin-bottom: vars.$spacing * 5;
+    padding: vars.$spacing * 2;
   }
 }

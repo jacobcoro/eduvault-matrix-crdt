@@ -26,7 +26,6 @@ const NotesApp = () => {
     };
     notes.push(newNote);
   };
-  console.log({ notes });
   const handleChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
     if (e.target.value) setNoteText(e.target.value);
   };
