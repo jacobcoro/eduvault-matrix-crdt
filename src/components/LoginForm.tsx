@@ -28,7 +28,7 @@ const LoginForm = ({
 
   return (
     <div className={style.root}>
-      <form>
+      <form onSubmit={(e) => e.preventDefault()}>
         <label htmlFor="server-input">Homeserver:</label>
         <input
           id="server-input"
