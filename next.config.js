@@ -1,6 +1,6 @@
 module.exports = {
   webpack: (config, { webpack }) => {
-    config.plugins.push(new webpack.IgnorePlugin(/spec/));
+    config.plugins.push(new webpack.IgnorePlugin({ resourceRegExp: /.spec./ }));
 
     config.node = {
       fs: 'empty',
