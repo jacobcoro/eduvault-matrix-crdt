@@ -1,9 +1,12 @@
 import { emptyStore, Store } from 'model';
 import {
   createContext,
+  Dispatch,
   FC,
   PropsWithChildren,
+  SetStateAction,
   useCallback,
+  useRef,
   useState,
 } from 'react';
 import { syncedStore } from '@syncedstore/core';
@@ -14,20 +17,27 @@ import * as Y from 'yjs';
 import { getYjsValue } from '@syncedstore/core';
 import { createMatrixClient, LoginData } from './utils';
 
-type LoginStatus = 'initial' | 'loading' | 'failed' | 'ok' | 'disconnected';
+export type LoginStatus =
+  | 'initial'
+  | 'loading'
+  | 'failed'
+  | 'ok'
+  | 'disconnected';
 
+type LoginFunction = (
+  loginData: LoginData,
+  setLoginStatus: (status: LoginStatus) => void
+) => Promise<void>;
 export interface StoreContext {
   store: Store;
-  login: (loginData: LoginData) => Promise<void>;
+  login: LoginFunction;
   matrixClient: MatrixClient | undefined;
-  loginStatus: LoginStatus;
 }
 
 const initialStore: StoreContext = {
   store: emptyStore,
   login: async () => undefined,
   matrixClient: undefined,
-  loginStatus: 'initial',
 };
 
 export const StoreContext = createContext<StoreContext>(initialStore);
@@ -64,58 +74,67 @@ export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
   const store = globalStore as Store;
   const doc = getYjsValue(store) as Y.Doc;
 
-  const [matrixProvider, setMatrixProvider] = useState<MatrixProvider>();
-  const [loginStatus, setLoginStatus] = useState<LoginStatus>('initial');
-  const [roomAlias, setRoomAlias] = useState<string>(TEST_ROOM_ID);
-  const [matrixClient, setMatrixClient] = useState<any>();
+  let matrixProvider = useRef<MatrixProvider>();
+  let matrixClient = useRef<MatrixClient>();
 
-  const connect = useCallback(
-    (matrixClient: MatrixClient, roomAlias: string) => {
+  const connect = (
+    matrixClient: MatrixClient,
+    roomAlias: string,
+    setLoginStatus: (status: LoginStatus) => void
+  ) => {
+    try {
       if (!matrixClient || !roomAlias) {
         throw new Error("can't connect without matrixClient or roomAlias");
       }
-      setLoginStatus('loading');
 
-      const matrixProvider = newMatrixProvider({
+      matrixProvider.current = newMatrixProvider({
         doc,
         matrixClient,
         roomAlias,
       });
-      setMatrixProvider(matrixProvider);
 
       // (optional): capture events from MatrixProvider to reflect the status in the UI
-      matrixProvider.onDocumentAvailable((e) => {
+      matrixProvider.current.onDocumentAvailable((e) => {
         setLoginStatus('ok');
       });
 
-      matrixProvider.onCanWriteChanged((e) => {
-        if (!matrixProvider.canWrite) {
+      matrixProvider.current.onCanWriteChanged((e) => {
+        console.log(matrixProvider.current?.canWrite);
+        if (matrixProvider.current && !matrixProvider.current.canWrite) {
           setLoginStatus('failed');
         } else {
           setLoginStatus('ok');
         }
       });
 
-      matrixProvider.onDocumentUnavailable((e) => {
+      matrixProvider.current.onDocumentUnavailable((e) => {
         setLoginStatus('failed');
       });
-    },
-    [doc]
-  );
-  const login = async (loginData: LoginData) => {
-    if (matrixProvider) {
-      matrixProvider.dispose();
-      setLoginStatus('disconnected');
-      setMatrixProvider(undefined);
+    } catch (error) {
+      setLoginStatus('failed');
     }
-    const matrixClient = await createMatrixClient(loginData!);
-    setMatrixClient(matrixClient);
-    setRoomAlias(roomAlias);
+  };
 
-    connect(matrixClient, roomAlias);
+  const login: LoginFunction = async (loginData, setLoginStatus) => {
+    try {
+      if (matrixProvider) {
+        matrixProvider.current?.dispose();
+        setLoginStatus('disconnected');
+        matrixProvider.current = undefined;
+      }
+      setLoginStatus('loading');
+
+      matrixClient.current = await createMatrixClient(loginData);
+      connect(matrixClient.current, TEST_ROOM_ID, setLoginStatus);
+    } catch (error) {
+      console.error(error);
+      setLoginStatus('failed');
+    }
   };
   return (
-    <StoreContext.Provider value={{ store, login, loginStatus, matrixClient }}>
+    <StoreContext.Provider
+      value={{ store, login, matrixClient: matrixClient.current }}
+    >
       {children}
     </StoreContext.Provider>
   );

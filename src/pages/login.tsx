@@ -1,15 +1,22 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import styles from './index.module.scss';
-import { StoreContext } from 'model/storeContext';
+import { LoginStatus, StoreContext } from 'model/storeContext';
 import {
   DEV_PASSWORD,
   DEV_USERNAME,
   MATRIX_SERVER,
   TEST_ROOM_ID,
 } from 'config';
+import { useRouter } from 'next/router';
 
 const Login = () => {
-  const { store, login, loginStatus, matrixClient } = useContext(StoreContext);
+  const [loginStatus, setLoginStatus] = useState<LoginStatus>('initial');
+  const onSetLoginStatus = (status: LoginStatus) => {
+    setLoginStatus(status);
+    if (status === 'ok') router.push('/app');
+  };
+  const router = useRouter();
+  const { store, login, matrixClient } = useContext(StoreContext);
   const loginData = {
     server: MATRIX_SERVER,
     user: DEV_USERNAME,
@@ -23,7 +30,7 @@ const Login = () => {
       <div>
         <button
           onClick={() => {
-            login(loginData);
+            login(loginData, onSetLoginStatus as any);
           }}
         >
           Login
