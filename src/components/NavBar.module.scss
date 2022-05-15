@@ -27,3 +27,9 @@
     margin-right: vars.$spacing * 4;
   }
 }
+.iconButton {
+  @include mixins.icon-button;
+  &:hover {
+    color: white;
+  }
+}

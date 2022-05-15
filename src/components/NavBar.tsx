@@ -1,12 +1,15 @@
 import useTheme from './useTheme';
 import styles from './NavBar.module.scss';
 import Link from 'next/link';
+import { Moon, Sun } from '@styled-icons/fa-solid';
 const NavBar = () => {
-  const { toggleTheme } = useTheme();
+  const { toggleTheme, theme } = useTheme();
   return (
     <div className={styles.root}>
       <nav>
-        <button onClick={() => toggleTheme()}>toggle theme</button>
+        <button onClick={() => toggleTheme()} className={styles.iconButton}>
+          {theme === 'light' ? <Moon size={24} /> : <Sun size={24} />}
+        </button>
         <ul className="links" role="navigation">
           <li>
             <Link href="/">Home</Link>
