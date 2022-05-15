@@ -1,3 +1,4 @@
+import { TEST_ROOM_ID } from 'config';
 import { MatrixProvider } from 'matrix-crdt';
 import { MatrixClient } from 'matrix-js-sdk';
 import { useCallback, useState } from 'react';
@@ -5,10 +6,12 @@ type LoginStatus = 'loading' | 'failed' | 'ok' | 'disconnected';
 import styles from './index.module.scss';
 
 const Login = () => {
+  console.log({ TEST_ROOM_ID });
   const [matrixProvider, setMatrixProvider] = useState<MatrixProvider>();
   const [status, setStatus] = useState<LoginStatus>();
+  const [roomAlias, setRoomAlias] = useState<string>();
   const onLogin = useCallback(
-    (matrixClient: MatrixClient, roomAlias: string) => {
+    (matrixClient: MatrixClient, roomAlias = TEST_ROOM_ID) => {
       if (matrixProvider) {
         matrixProvider.dispose();
         setStatus('disconnected');
@@ -40,7 +43,7 @@ const Login = () => {
 
       // (optional) stored on state for easy disconnect + connect toggle
       // setMatrixClient(matrixClient);
-      // setRoomAlias(roomAlias);
+      setRoomAlias(roomAlias);
 
       // actually connect
       // connect(matrixClient, roomAlias);
