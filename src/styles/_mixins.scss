@@ -1,7 +1,7 @@
 @use 'variables' as vars;
 
 @mixin card {
-  border-radius: 8px;
+  border-radius: 16px;
   background-color: var(--paper);
   box-shadow: var(--shadow);
 }
@@ -24,4 +24,29 @@
   margin: auto;
   margin-top: vars.$spacing * 4;
   padding: vars.$spacing * 4;
+}
+
+@mixin flex-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin flex-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin icon-button {
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  color: var(--text);
+  &:hover {
+    color: var(--secondary);
+    transform: scale(1.1);
+  }
 }

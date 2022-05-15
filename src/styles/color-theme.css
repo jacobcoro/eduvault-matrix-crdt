@@ -13,7 +13,7 @@
 /* Dark Mode */
 .root[data-theme='dark'] {
   --primary: #f39a4d;
-  --secondary: #845ea7;
+  --secondary: #12aabb;
   --text: #ffff;
   --text-light: #bbbbbb;
   --bg: #171717;

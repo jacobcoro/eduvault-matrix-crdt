@@ -1,11 +1,9 @@
 @import './reset.css';
 @import './color-theme.css';
 
-* {
-  color: var(--text);
-}
-
 #app-root {
+  color: var(--text);
+
   padding-top: 60px; /* for navbar space */
   position: fixed;
   width: 100%;

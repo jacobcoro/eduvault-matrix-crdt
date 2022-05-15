@@ -4,4 +4,4 @@ export type Store = {
   notes: Notes;
 };
 
-export const emptyStore: Store = { notes: {} };
+export const emptyStore: Store = { notes: [] };

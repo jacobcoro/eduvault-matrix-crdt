@@ -5,7 +5,12 @@
   position: absolute;
   top: 0;
   width: 100%;
-  background-color: var(--paper);
+  background-color: var(--secondary);
+
+  a {
+    color: white;
+    text-decoration: none;
+  }
 
   nav {
     @include mixins.container;

@@ -71,8 +71,8 @@ const newMatrixProvider = ({
 };
 
 export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
-  const store = globalStore as Store;
-  const doc = getYjsValue(store) as Y.Doc;
+  const store = useRef(globalStore).current as Store;
+  const doc = useRef(getYjsValue(store)).current as Y.Doc;
 
   let matrixProvider = useRef<MatrixProvider>();
   let matrixClient = useRef<MatrixClient>();
