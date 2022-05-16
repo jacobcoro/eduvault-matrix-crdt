@@ -29,7 +29,6 @@ const useTheme = () => {
 
   const toggleTheme = () => {
     const root = document.getElementById('app-root');
-    console.log({ root });
     if (!root) return;
     applyTheme(root.dataset.theme === 'light' ? 'dark' : 'light');
   };

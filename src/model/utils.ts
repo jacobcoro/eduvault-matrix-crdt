@@ -23,10 +23,11 @@ export async function createMatrixClient(data: LoginData) {
   if (data.token) {
     await matrixClient.loginWithToken(data.token);
   } else {
-    await matrixClient.login('m.login.password', {
+    const loginRes = await matrixClient.login('m.login.password', {
       user: data.user,
       password: data.password,
     });
+    console.log({ loginRes });
   }
 
   // overwrites because we don't call .start();

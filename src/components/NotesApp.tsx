@@ -13,8 +13,8 @@ import { ulid } from 'ulid';
 import style from './NotesApp.module.scss';
 const NotesApp = () => {
   const { store } = useContext(StoreContext);
-  const { notes } = useSyncedStore(store);
-
+  const syncedStore = useSyncedStore(store);
+  const notes = syncedStore.notes as Note[];
   const [noteText, setNoteText] = useState('');
   const createNote = (text: string) => {
     const id = ulid();
