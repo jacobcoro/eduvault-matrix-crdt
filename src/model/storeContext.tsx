@@ -3,7 +3,6 @@ import {
   createContext,
   Dispatch,
   FC,
-  MutableRefObject,
   PropsWithChildren,
   SetStateAction,
   useCallback,
@@ -14,7 +13,7 @@ import { syncedStore } from '@syncedstore/core';
 import { TEST_ROOM_ID } from 'config';
 import { MatrixProvider } from '@jacobcoro/matrix-crdt';
 import { MatrixClient } from 'matrix-js-sdk';
-import { Doc } from 'yjs';
+import * as Y from 'yjs';
 import { getYjsValue } from '@syncedstore/core';
 import { createMatrixClient, LoginData } from './utils';
 
@@ -30,26 +29,54 @@ type LoginFunction = (
   setLoginStatus: (status: LoginStatus) => void
 ) => Promise<void>;
 export interface StoreContext {
-  store: any;
+  store: Store;
   login: LoginFunction;
   matrixClient: MatrixClient | undefined;
 }
 
 const initialStore: StoreContext = {
-  store: {},
+  store: emptyStore,
   login: async () => undefined,
   matrixClient: undefined,
 };
 
 export const StoreContext = createContext<StoreContext>(initialStore);
 
+const newMatrixProvider = ({
+  matrixClient,
+  doc,
+  roomAlias,
+}: {
+  matrixClient: MatrixClient;
+  doc: Y.Doc;
+  roomAlias: string;
+}) => {
+  // This is the main code that sets up the connection between
+  // yjs and Matrix. It creates a new MatrixProvider and
+  // registers it to the `doc`.
+  const newMatrixProvider = new MatrixProvider(
+    doc,
+    matrixClient,
+    { type: 'alias', alias: roomAlias },
+    undefined,
+    {
+      translator: { updatesAsRegularMessages: true },
+      reader: { snapshotInterval: 10 },
+      writer: { flushInterval: 500 },
+    }
+  );
+  newMatrixProvider.initialize();
+  return newMatrixProvider;
+};
+
 export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
-  const store = syncedStore(emptyStore);
+  const store = useRef(syncedStore(emptyStore)).current as Store;
+  const doc = useRef(getYjsValue(store)).current as Y.Doc;
 
   let matrixProvider = useRef<MatrixProvider>();
   let matrixClient = useRef<MatrixClient>();
 
-  const connect = async (
+  const connect = (
     matrixClient: MatrixClient,
     roomAlias: string,
     setLoginStatus: (status: LoginStatus) => void
@@ -58,51 +85,20 @@ export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
       if (!matrixClient || !roomAlias) {
         throw new Error("can't connect without matrixClient or roomAlias");
       }
-      const newMatrixProvider = ({
-        matrixClient,
-        doc,
-        roomAlias,
-      }: {
-        matrixClient: MatrixClient;
-        doc: Doc;
-        roomAlias: string;
-      }) => {
-        // This is the main code that sets up the connection between
-        // yjs and Matrix. It creates a new MatrixProvider and
-        // registers it to the `doc`.
-        const newMatrixProvider = new MatrixProvider(
-          doc,
-          matrixClient,
-          { type: 'alias', alias: roomAlias },
-          undefined,
-          {
-            enableExperimentalWebrtcSync: true,
-            translator: { updatesAsRegularMessages: true },
-            reader: { snapshotInterval: 10 },
-            writer: { flushInterval: 500 },
-          }
-        );
-        newMatrixProvider.initialize();
-        return newMatrixProvider;
-      };
+
       matrixProvider.current = newMatrixProvider({
-        doc: getYjsValue(store) as Doc,
+        doc,
         matrixClient,
         roomAlias,
       });
 
       // (optional): capture events from MatrixProvider to reflect the status in the UI
       matrixProvider.current.onDocumentAvailable((e) => {
-        console.log('document available');
-        console.log(
-          'matrixProvider.current.canWrite',
-          matrixProvider.current?.canWrite
-        ); // prints true. but previous state hasn't been loaded.
         setLoginStatus('ok');
       });
 
       matrixProvider.current.onCanWriteChanged((e) => {
-        console.log('can write changed'); // never gets called
+        console.log(matrixProvider.current?.canWrite);
         if (matrixProvider.current && !matrixProvider.current.canWrite) {
           setLoginStatus('failed');
         } else {
