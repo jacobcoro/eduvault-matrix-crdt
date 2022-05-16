@@ -16,6 +16,7 @@ import { MatrixClient } from 'matrix-js-sdk';
 import * as Y from 'yjs';
 import { getYjsValue } from '@syncedstore/core';
 import { createMatrixClient, LoginData } from './utils';
+import { IndexeddbPersistence } from 'y-indexeddb';
 
 export type LoginStatus =
   | 'initial'
@@ -73,6 +74,7 @@ export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
   const store = useRef(syncedStore(emptyStore)).current as Store;
   const doc = useRef(getYjsValue(store)).current as Y.Doc;
 
+  // const localStorageProvider = new IndexeddbPersistence('my-document-id', doc);
   let matrixProvider = useRef<MatrixProvider>();
   let matrixClient = useRef<MatrixClient>();
 

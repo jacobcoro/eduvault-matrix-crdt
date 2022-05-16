@@ -77,6 +77,8 @@ const NotesApp = () => {
                   </button>
                 </div>
                 <p>{note.text}</p>
+                <p>updated: {new Date(note._updated).toLocaleTimeString()}</p>
+                <p>created: {new Date(note._created).toLocaleTimeString()}</p>
               </div>
             )
         )}
