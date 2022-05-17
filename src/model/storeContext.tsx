@@ -38,8 +38,58 @@ const initialStore: StoreContext = {
   matrixClient: undefined,
   loggedIn: false,
 };
-
+enum Visibility {
+  Public = 'public',
+  Private = 'private',
+}
 export const StoreContext = createContext<StoreContext>(initialStore);
+
+/** @example ('@username:matrix.org')=> 'eduvault_root_username' */
+const constructRootRoomAliasTruncated = (userId: string) => {
+  return `${constructRootRoomAlias(userId).split('#')[1].split(':')[0]}`;
+};
+/** @example ('@username:matrix.org')=> '#eduvault_root_username:matrix.org' */
+const constructRootRoomAlias = (userId: string) => {
+  return `#eduvault_root_${userId.split('@')[1]}`;
+};
+
+const getOrCreateRootRoom = async (
+  matrixClient: MatrixClient,
+  userId: string
+) => {
+  // const joinedRooms = await matrixClient.getJoinedRooms();
+  // console.log({ joinedRooms });
+  // const allRooms = await matrixClient.getRooms();
+  // console.log({ allRooms }); // so much empty....
+  const rootRoomAlias = constructRootRoomAlias(userId);
+
+  let existingRoom: { room_id: string } | null = null;
+  try {
+    existingRoom = await matrixClient.getRoomIdForAlias(rootRoomAlias);
+  } catch (error) {
+    // console.log('room not found from alias');
+  }
+  if (existingRoom?.room_id) {
+    return existingRoom.room_id;
+  } else {
+    let newRoom: { room_id: string } | null = null;
+    try {
+      newRoom = await matrixClient.createRoom({
+        room_alias_name: constructRootRoomAliasTruncated(userId),
+        name: 'Eduvault Root',
+        topic: 'The root ',
+        // visibility: Visibility.Private, // some bad typings from the sdk. this is expecting an enum. but the enum is not exported from the library.
+      });
+      if (!newRoom || newRoom.room_id) throw new Error('no room id');
+    } catch (error: any) {
+      if (error.message.includes('M_ROOM_IN_USE'))
+        console.log('room already exists');
+      // still a problem that it wasn't caught before this
+      throw new Error(error);
+    }
+    return newRoom.room_id;
+  }
+};
 
 const newMatrixProvider = ({
   matrixClient,
@@ -93,12 +143,20 @@ export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
         });
 
         // (optional): capture events from MatrixProvider to reflect the status in the UI
-        matrixProvider.current.onDocumentAvailable((e) => {
+        matrixProvider.current.onDocumentAvailable(async (e) => {
+          const rootRoomIdResponse = await getOrCreateRootRoom(
+            matrixClient,
+            matrixClient.getUserId()
+          );
+          console.log({ rootRoomIdResponse });
+          console.log('onDocumentAvailable', e);
           setLoggedIn(true);
           setLoginStatus('ok');
         });
 
         matrixProvider.current.onCanWriteChanged((e) => {
+          // this never seems to be called
+          console.log('onCanWriteChanged', e);
           console.log(matrixProvider.current?.canWrite);
           if (matrixProvider.current && !matrixProvider.current.canWrite) {
             setLoggedIn(false);
