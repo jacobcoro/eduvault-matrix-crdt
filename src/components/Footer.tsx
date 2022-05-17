@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import style from './Footer.module.scss';
 
 const Footer = () => {
-  const { matrixClient } = useContext(StoreContext);
+  const { loggedIn, matrixClient } = useContext(StoreContext);
   const [userId, setUserId] = useState('');
   useEffect(() => {
     const getMe = async () => {
@@ -11,7 +11,7 @@ const Footer = () => {
       if (res) setUserId(res.user_id);
     };
     getMe();
-  }, [matrixClient]);
+  }, [loggedIn, matrixClient]);
   return (
     <footer className={style.root}>
       {userId ? <p>{`signed in as: ${userId}`}</p> : <p>Not signed in</p>}

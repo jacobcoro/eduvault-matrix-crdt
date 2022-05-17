@@ -4,7 +4,7 @@ import { FC, useCallback, useContext, useEffect, useState } from 'react';
 
 const RouteGuard: FC<any> = ({ children }) => {
   const router = useRouter();
-  const store = useContext(StoreContext);
+  const { loggedIn, login } = useContext(StoreContext);
   const [loginStatus, setLoginStatus] = useState<LoginStatus>('initial');
   const onSetLoginStatus = useCallback((status: LoginStatus) => {
     setLoginStatus(status);
@@ -15,8 +15,7 @@ const RouteGuard: FC<any> = ({ children }) => {
     return null;
   }
 
-  const loggedIn = loginStatus === 'ok' || !!store.matrixClient;
-  if (loggedIn) return <>{children}</>;
+  if (loggedIn || loginStatus === 'ok') return <>{children}</>;
 
   if (loginStatus === 'loading') return <div>...loading</div>;
 
@@ -25,7 +24,7 @@ const RouteGuard: FC<any> = ({ children }) => {
 
   if (previousLoginData) {
     const loginData = JSON.parse(previousLoginData);
-    store.login(loginData, onSetLoginStatus);
+    login(loginData, onSetLoginStatus);
     return <div>...loading</div>;
   } else {
     // if not logged in, and no localStorage, redirect to login page.

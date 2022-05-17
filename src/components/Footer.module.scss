@@ -6,8 +6,9 @@
   bottom: 0;
   width: 100%;
   background-color: white;
+  text-align: end;
   p {
     color: black;
-    padding-left: vars.$spacing * 1;
+    padding-right: vars.$spacing * 1;
   }
 }
