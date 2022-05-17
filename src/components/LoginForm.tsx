@@ -32,8 +32,8 @@ const LoginForm = ({
         <label htmlFor="server-input">Homeserver:</label>
         <input
           id="server-input"
-          value={loginData.server}
-          onChange={(e) => handleChange('server', e.target.value)}
+          value={loginData.baseUrl}
+          onChange={(e) => handleChange('baseUrl', e.target.value)}
         />
 
         <label htmlFor="room-input">Room alias</label>
@@ -49,8 +49,8 @@ const LoginForm = ({
           autoComplete="username"
           placeholder="e.g.: @yousefed:matrix.org"
           id="user-input"
-          onChange={(e) => handleChange('user', e.target.value)}
-          value={loginData.user}
+          onChange={(e) => handleChange('userId', e.target.value)}
+          value={loginData.userId}
         ></input>
 
         <label htmlFor="password-input">Password:</label>

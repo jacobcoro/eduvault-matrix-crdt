@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { useRouteGuard } from './_app';
+import { useRouteGuard } from '../components/useRouteGuard';
 const NotesApp = dynamic(() => import('../components/NotesApp'), {
   ssr: false,
 });

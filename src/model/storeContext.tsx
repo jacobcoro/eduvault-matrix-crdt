@@ -75,7 +75,6 @@ export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
   const store = useRef(syncedStore(emptyStore)).current as Store;
   const doc = useRef(getYjsValue(store)).current as Y.Doc;
 
-  const localStorageProvider = new IndexeddbPersistence('my-document-id', doc);
   let matrixProvider = useRef<MatrixProvider>();
   let matrixClient = useRef<MatrixClient>();
 
@@ -145,12 +144,16 @@ export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
   );
 
   useEffect(() => {
+    // initialize localStorage indexedDb sync provider
+    // put in useEffect to make sure it only runs client side
+    new IndexeddbPersistence('my-document-id', doc);
+
     const previousLoginData = localStorage.getItem('loginData');
     if (previousLoginData) {
       const loginData = JSON.parse(previousLoginData);
       login(loginData, (status: string) => null);
     }
-  }, [login]);
+  }, [login, doc]);
   return (
     <StoreContext.Provider
       value={{ store, login, matrixClient: matrixClient.current }}

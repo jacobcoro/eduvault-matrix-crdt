@@ -1,0 +1,13 @@
+@use 'styles/_variables' as vars;
+@use 'styles/_mixins' as mixins;
+
+.root {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background-color: white;
+  p {
+    color: black;
+    padding-left: vars.$spacing * 1;
+  }
+}
