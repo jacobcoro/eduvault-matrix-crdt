@@ -1,12 +1,14 @@
 import dynamic from 'next/dynamic';
-import { useRouteGuard } from '../components/useRouteGuard';
-const NotesApp = dynamic(() => import('../components/NotesApp'), {
+import NotesApp from '../components/NotesApp';
+const RouteGuard = dynamic(() => import('../components/RouteGuard'), {
   ssr: false,
 });
 const App = () => {
-  useRouteGuard();
-
-  return <NotesApp />;
+  return (
+    <RouteGuard>
+      <NotesApp />
+    </RouteGuard>
+  );
 };
 
 export default App;

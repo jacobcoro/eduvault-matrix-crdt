@@ -19,12 +19,7 @@ import { getYjsValue } from '@syncedstore/core';
 import { createMatrixClient, LoginData } from './utils';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
-export type LoginStatus =
-  | 'initial'
-  | 'loading'
-  | 'failed'
-  | 'ok'
-  | 'disconnected';
+export type LoginStatus = 'initial' | 'loading' | 'failed' | 'ok';
 
 type LoginFunction = (
   loginData: LoginData,
@@ -124,7 +119,6 @@ export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
       try {
         if (matrixProvider) {
           matrixProvider.current?.dispose();
-          setLoginStatus('disconnected');
           matrixProvider.current = undefined;
         }
         setLoginStatus('loading');
@@ -147,12 +141,6 @@ export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
     // initialize localStorage indexedDb sync provider
     // put in useEffect to make sure it only runs client side
     new IndexeddbPersistence('my-document-id', doc);
-
-    const previousLoginData = localStorage.getItem('loginData');
-    if (previousLoginData) {
-      const loginData = JSON.parse(previousLoginData);
-      login(loginData, (status: string) => null);
-    }
   }, [login, doc]);
   return (
     <StoreContext.Provider
