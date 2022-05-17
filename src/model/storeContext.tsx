@@ -6,6 +6,7 @@ import {
   PropsWithChildren,
   SetStateAction,
   useCallback,
+  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -74,64 +75,82 @@ export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
   const store = useRef(syncedStore(emptyStore)).current as Store;
   const doc = useRef(getYjsValue(store)).current as Y.Doc;
 
-  // const localStorageProvider = new IndexeddbPersistence('my-document-id', doc);
+  const localStorageProvider = new IndexeddbPersistence('my-document-id', doc);
   let matrixProvider = useRef<MatrixProvider>();
   let matrixClient = useRef<MatrixClient>();
 
-  const connect = (
-    matrixClient: MatrixClient,
-    roomAlias: string,
-    setLoginStatus: (status: LoginStatus) => void
-  ) => {
-    try {
-      if (!matrixClient || !roomAlias) {
-        throw new Error("can't connect without matrixClient or roomAlias");
-      }
-
-      matrixProvider.current = newMatrixProvider({
-        doc,
-        matrixClient,
-        roomAlias,
-      });
-
-      // (optional): capture events from MatrixProvider to reflect the status in the UI
-      matrixProvider.current.onDocumentAvailable((e) => {
-        setLoginStatus('ok');
-      });
-
-      matrixProvider.current.onCanWriteChanged((e) => {
-        console.log(matrixProvider.current?.canWrite);
-        if (matrixProvider.current && !matrixProvider.current.canWrite) {
-          setLoginStatus('failed');
-        } else {
-          setLoginStatus('ok');
+  const connect = useCallback(
+    (
+      matrixClient: MatrixClient,
+      roomAlias: string,
+      setLoginStatus: (status: LoginStatus) => void
+    ) => {
+      try {
+        if (!matrixClient || !roomAlias) {
+          throw new Error("can't connect without matrixClient or roomAlias");
         }
-      });
 
-      matrixProvider.current.onDocumentUnavailable((e) => {
+        matrixProvider.current = newMatrixProvider({
+          doc,
+          matrixClient,
+          roomAlias,
+        });
+
+        // (optional): capture events from MatrixProvider to reflect the status in the UI
+        matrixProvider.current.onDocumentAvailable((e) => {
+          setLoginStatus('ok');
+        });
+
+        matrixProvider.current.onCanWriteChanged((e) => {
+          console.log(matrixProvider.current?.canWrite);
+          if (matrixProvider.current && !matrixProvider.current.canWrite) {
+            setLoginStatus('failed');
+          } else {
+            setLoginStatus('ok');
+          }
+        });
+
+        matrixProvider.current.onDocumentUnavailable((e) => {
+          setLoginStatus('failed');
+        });
+      } catch (error) {
         setLoginStatus('failed');
-      });
-    } catch (error) {
-      setLoginStatus('failed');
-    }
-  };
-
-  const login: LoginFunction = async (loginData, setLoginStatus) => {
-    try {
-      if (matrixProvider) {
-        matrixProvider.current?.dispose();
-        setLoginStatus('disconnected');
-        matrixProvider.current = undefined;
       }
-      setLoginStatus('loading');
+    },
+    [doc]
+  );
 
-      matrixClient.current = await createMatrixClient(loginData);
-      connect(matrixClient.current, TEST_ROOM_ID, setLoginStatus);
-    } catch (error) {
-      console.error(error);
-      setLoginStatus('failed');
+  const login: LoginFunction = useCallback(
+    async (loginData, setLoginStatus) => {
+      try {
+        if (matrixProvider) {
+          matrixProvider.current?.dispose();
+          setLoginStatus('disconnected');
+          matrixProvider.current = undefined;
+        }
+        setLoginStatus('loading');
+
+        matrixClient.current = await createMatrixClient(loginData);
+        connect(
+          matrixClient.current,
+          loginData.roomAlias ?? TEST_ROOM_ID,
+          setLoginStatus
+        );
+      } catch (error) {
+        console.error(error);
+        setLoginStatus('failed');
+      }
+    },
+    [connect]
+  );
+
+  useEffect(() => {
+    const previousLoginData = localStorage.getItem('loginData');
+    if (previousLoginData) {
+      const loginData = JSON.parse(previousLoginData);
+      login(loginData, (status: string) => null);
     }
-  };
+  }, [login]);
   return (
     <StoreContext.Provider
       value={{ store, login, matrixClient: matrixClient.current }}

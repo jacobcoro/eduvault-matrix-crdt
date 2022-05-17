@@ -1,33 +1,49 @@
-import sdk from 'matrix-js-sdk';
+import sdk, { ICreateClientOpts } from 'matrix-js-sdk';
 
-export type LoginData = {
-  server: string;
-  user: string;
-  roomAlias: string;
+export interface LoginData extends ICreateClientOpts {
   password?: string;
-  token?: string;
+  roomAlias?: string;
+}
+
+export type MatrixLoginRes = {
+  access_token: string;
+  device_id: string;
+  home_server: string;
+  user_id: string;
+  well_known: { 'm.homeserver': { base_url: string } };
 };
 
 export async function createMatrixClient(data: LoginData) {
+  const { password, accessToken, baseUrl, userId, roomAlias } = data;
   const signInOpts = {
-    baseUrl: data.server,
-    userId: data.user,
+    baseUrl,
+    userId,
   };
-  const matrixClient = data.token
+  const matrixClient = accessToken
     ? sdk.createClient({
         ...signInOpts,
-        accessToken: data.token,
+        accessToken,
       })
     : sdk.createClient(signInOpts);
 
-  if (data.token) {
-    await matrixClient.loginWithToken(data.token);
+  if (accessToken) {
+    // await matrixClient.loginWithToken(accessToken);
   } else {
-    const loginRes = await matrixClient.login('m.login.password', {
-      user: data.user,
-      password: data.password,
-    });
-    console.log({ loginRes });
+    const loginRes: MatrixLoginRes = await matrixClient.login(
+      'm.login.password',
+      {
+        user: userId,
+        password,
+      }
+    );
+    const loginSaveData: LoginData = {
+      baseUrl,
+      roomAlias,
+      userId,
+      accessToken: loginRes.access_token,
+      deviceId: loginRes.device_id,
+    };
+    localStorage.setItem('loginData', JSON.stringify(loginSaveData));
   }
 
   // overwrites because we don't call .start();
