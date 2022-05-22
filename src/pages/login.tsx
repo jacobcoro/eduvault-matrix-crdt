@@ -1,6 +1,7 @@
 import { useContext, useState } from 'react';
 import styles from './index.module.scss';
-import { LoginStatus, StoreContext } from 'model/storeContext';
+import { StoreContext } from 'model/storeContext';
+import { ConnectStatus } from 'model';
 import {
   DEV_PASSWORD,
   DEV_USERNAME,
@@ -12,8 +13,8 @@ import LoginForm from 'components/LoginForm';
 import { LoginData } from 'model/database/utils';
 
 const Login = () => {
-  const [loginStatus, setLoginStatus] = useState<LoginStatus>('initial');
-  const onSetLoginStatus = (status: LoginStatus) => {
+  const [loginStatus, setLoginStatus] = useState<ConnectStatus>('initial');
+  const onSetLoginStatus = (status: ConnectStatus) => {
     setLoginStatus(status);
     if (status === 'ok') router.push('/app');
   };
