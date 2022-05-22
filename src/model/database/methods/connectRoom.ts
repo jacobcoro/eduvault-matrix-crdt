@@ -13,12 +13,10 @@ export const connectRoom = (_db: Database) =>
     registryConnect?: true
   ) {
     return new Promise<boolean>((resolve, reject) => {
-      console.log({ room });
       try {
         _db.collections[room.collectionKey][room._id].connectStatus = 'loading';
 
         const roomAlias = room.roomAlias;
-        console.log({ roomAlias });
         if (!roomAlias) {
           throw new Error("can't connect without roomAlias");
         }
@@ -30,59 +28,31 @@ export const connectRoom = (_db: Database) =>
 
         // todo: do we also need to register the localStorage provider here too?
 
-        const attemptConnect = () => {
-          if (_db.matrixClient)
-            room.matrixProvider = newMatrixProvider({
-              doc,
-              matrixClient: _db.matrixClient,
-              roomAlias,
-            });
-        };
-        attemptConnect();
+        room.matrixProvider = newMatrixProvider({
+          doc,
+          matrixClient: _db.matrixClient,
+          roomAlias,
+        });
 
         // connect or fail callbacks:
         room.matrixProvider?.onDocumentAvailable(async (e) => {
-          console.log('onDocumentAvailable', e);
           _db.collections[room.collectionKey][room._id].doc = doc;
           _db.collections[room.collectionKey][room._id].store = store;
 
           if (!registryConnect) {
-            let registryEntry =
-              _db.collections.registry[0].store.documents[0][
-                room.collectionKey
-              ][room._id];
-            console.log({ registryEntry });
-            // if room isn't in registry:
-            if (!registryEntry) {
-              _db.collections.registry[0].store.documents[0][
-                room.collectionKey
-              ][room._id] = {
-                roomAlias,
-                roomId: room._id,
-              };
-              console.log(
-                'updated registry',
-                JSON.parse(
-                  JSON.stringify(
-                    _db.collections.registry[0].store.documents[0][
-                      room.collectionKey
-                    ]
-                  )
-                )
-              );
-            }
+            // register room in registry
+            _db.collections.registry[0].store.documents[0][room.collectionKey][
+              room._id
+            ] = {
+              roomAlias,
+              roomId: room._id,
+            };
           }
 
           if (registryConnect) {
-            console.log(
-              'registryConnect',
-              _db.collections.registry[0].store.documents
-            );
+            // set initial registry
             _db.collections.registry[0].store.documents[0] =
               initialRegistryStore.documents[0];
-
-            // todo: make a room connect state
-            // this only has to do with login because we need to make sure we've connected to the registry on login.
           }
           if (_db.onRoomConnectStatusUpdate)
             _db.onRoomConnectStatusUpdate('ok', room.collectionKey, room._id);
@@ -90,7 +60,6 @@ export const connectRoom = (_db: Database) =>
         });
 
         room.matrixProvider?.onDocumentUnavailable((e) => {
-          console.log('onDocumentUnavailable', e);
           if (_db.onRoomConnectStatusUpdate)
             _db.onRoomConnectStatusUpdate(
               'failed',
