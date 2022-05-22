@@ -8,12 +8,12 @@ import {
   truncateRoomAlias,
 } from '..';
 
-/** pass in undecorated alias. if the final will be # `#roomName_username:matrix.org' just pass roomName */
+/** pass in undecorated alias. if the final will be # `#alias_username:matrix.org' just pass alias */
 export const createAndConnectRoom =
   (_db: Database) =>
   async (
     collectionKey: CollectionKey,
-    roomName: string,
+    alias: string,
     name?: string,
     topic?: string
   ) => {
@@ -21,7 +21,7 @@ export const createAndConnectRoom =
       if (!_db.matrixClient)
         throw new Error("can't create room without matrixClient");
       const newNoteRoomAlias = buildRoomAlias(
-        roomName,
+        alias,
         _db.matrixClient.getUserId()
       );
       const newNoteRoomAliasTruncated = truncateRoomAlias(newNoteRoomAlias);
