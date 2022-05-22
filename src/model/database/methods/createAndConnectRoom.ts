@@ -1,5 +1,4 @@
-import { CollectionKey, Room } from '../types';
-import { MatrixClient } from 'matrix-js-sdk';
+import { CollectionKey } from '../types';
 import {
   buildRoomAlias,
   createRoom,
@@ -32,7 +31,6 @@ export const createAndConnectRoom =
           name,
           topic
         );
-        console.log({ result });
       } catch (error: any) {
         if (JSON.stringify(error).includes('M_ROOM_IN_USE'))
           console.log('room already exists');
