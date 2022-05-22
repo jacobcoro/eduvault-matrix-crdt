@@ -1,5 +1,4 @@
 import { Room } from '../types';
-import { MatrixClient } from 'matrix-js-sdk';
 
 import { syncedStore, getYjsValue } from '@syncedstore/core';
 import * as Y from 'yjs';
@@ -10,7 +9,6 @@ import { Database, initialRegistryStore } from '..';
 export const connectRoom = (_db: Database) =>
   function <T>(
     room: Room<T>,
-    matrixClient: MatrixClient,
     /** Only pass this when creating the registry itself */
     registryConnect?: true
   ) {
@@ -21,22 +19,26 @@ export const connectRoom = (_db: Database) =>
 
         const roomAlias = room.roomAlias;
         console.log({ roomAlias });
-        if (!matrixClient || !roomAlias) {
-          throw new Error("can't connect without matrixClient or roomAlias");
+        if (!roomAlias) {
+          throw new Error("can't connect without roomAlias");
+        }
+        if (!_db.matrixClient) {
+          throw new Error("can't connect without matrixClient");
         }
         const store = syncedStore({ documents: {} });
         const doc = getYjsValue(store) as Y.Doc;
 
         // todo: do we also need to register the localStorage provider here too?
 
-        const attemptConnect = async () => {
-          room.matrixProvider = newMatrixProvider({
-            doc,
-            matrixClient,
-            roomAlias,
-          });
+        const attemptConnect = () => {
+          if (_db.matrixClient)
+            room.matrixProvider = newMatrixProvider({
+              doc,
+              matrixClient: _db.matrixClient,
+              roomAlias,
+            });
         };
-        attemptConnect(); // just wrapping so it can be async
+        attemptConnect();
 
         // connect or fail callbacks:
         room.matrixProvider?.onDocumentAvailable(async (e) => {
@@ -56,6 +58,7 @@ export const connectRoom = (_db: Database) =>
                 room.collectionKey
               ][room._id] = {
                 roomAlias,
+                roomId: room._id,
               };
               console.log(
                 'updated registry',

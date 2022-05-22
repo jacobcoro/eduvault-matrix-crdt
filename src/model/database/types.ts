@@ -50,7 +50,7 @@ export type Collection<T> = {
 
 export interface RoomMetaData {
   roomAlias: string;
-  // roomId: string;
+  roomId: string;
 }
 
 export type RegistryData = {

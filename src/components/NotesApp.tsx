@@ -1,12 +1,14 @@
 import { Edit, Trash } from '@styled-icons/fa-solid';
 import { useSyncedStore } from '@syncedstore/react';
-import { Documents, Note } from 'model';
+import { CollectionKey, Documents, Note } from 'model';
 import { StoreContext } from 'model/storeContext';
 
 import {
   ChangeEventHandler,
   FormEventHandler,
+  useCallback,
   useContext,
+  useEffect,
   useState,
 } from 'react';
 import { ulid } from 'ulid';
@@ -18,12 +20,49 @@ const NotesApp = () => {
     db && db.collections.notes[0] ? db.collections.notes[0].store : null;
 
   const [ready, setReady] = useState(false);
+  const connectRoomsOrCreateDefaultRoom = useCallback(async () => {
+    if (!db) return null;
 
-  if (db)
+    // lookup notes rooms in registry
+    const notesRegistry = db.collections.registry[0].store.documents[0].notes;
+    // connect each note room
+    const notesKeysList = Object.keys(notesRegistry);
+
+    console.log({ notesKeysList });
+    if (notesKeysList.length === 0) {
+      await db.createAndConnectRoom(
+        CollectionKey.notes,
+        'notes-default',
+        'Default Notes Collection'
+      );
+    } else {
+      const noteRoomsRegistryKeys = Object.keys(
+        db.collections.registry[0].store.documents[0].notes
+      );
+      const noteRoomData = noteRoomsRegistryKeys.map(
+        (key) => db.collections.registry[0].store.documents[0].notes[key]
+      );
+      const promises = noteRoomData.map((room) => {
+        return async () => {
+          console.log('connecting room', room.roomAlias);
+          await db.connectRoom(db.collections.notes[room.roomId]);
+        };
+      });
+      await Promise.all(promises);
+    }
+  }, [db]);
+
+  useEffect(() => {
+    connectRoomsOrCreateDefaultRoom();
+  }, [connectRoomsOrCreateDefaultRoom]);
+
+  if (db && db.matrixClient) {
     db.onRoomConnectStatusUpdate = (status, collection) => {
-      if (status === 'ok' && collection === 'notes') setReady(true);
+      if (status === 'ok' && collection === 'notes') {
+        setReady(true);
+      }
     };
-
+  }
   if (!db || !store || JSON.stringify(store) === '{}' || !ready)
     return <div>...loading collection</div>;
   return <NotesAppInternal store={db.collections.notes[0].store.documents} />;

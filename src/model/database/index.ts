@@ -1,6 +1,6 @@
 import { MatrixClient } from 'matrix-js-sdk';
 import { collectionKeys, collections } from './collections';
-import { connectRoom, login } from './methods';
+import { connectRoom, createAndConnectRoom, login } from './methods';
 import {
   Collection,
   CollectionKey,
@@ -29,6 +29,7 @@ export const initialRegistryStore = {
     },
   },
 };
+
 export const initialRegistry: Collection<RegistryData> = {
   '0': {
     connectStatus: 'initial',
@@ -56,7 +57,6 @@ export class Database {
 
   updateLoginStatus = updateLoginStatus(this);
   onLoginStatusUpdate: null | OnLoginStatusUpdate = null;
-
   onRoomConnectStatusUpdate: null | OnRoomConnectStatusUpdate = null;
 
   /** homeserver */
@@ -69,6 +69,7 @@ export class Database {
   };
 
   connectRoom = connectRoom(this);
+  createAndConnectRoom = createAndConnectRoom(this);
   login = login(this);
   constructor() {
     // todo: if registry is in localStorage, load up each room's store.

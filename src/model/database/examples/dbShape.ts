@@ -20,11 +20,11 @@ export const exampleDb: { collections: Collections } = {
               _created: 0,
               _updated: 0,
               notes: {
-                ['0']: { roomAlias: 'notes-room-alias-1' },
+                ['0']: { roomAlias: 'notes-room-alias-1', roomId: '0' },
               },
               flashcards: {
-                ['0']: { roomAlias: 'flashcard-room-alias-1' },
-                ['1']: { roomAlias: 'flashcard-room-alias-2' },
+                ['0']: { roomAlias: 'flashcard-room-alias-1', roomId: '0' },
+                ['1']: { roomAlias: 'flashcard-room-alias-2', roomId: '0' },
               },
               registry: {},
             },
