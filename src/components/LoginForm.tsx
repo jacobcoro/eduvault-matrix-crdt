@@ -34,18 +34,10 @@ const LoginForm = ({
           onChange={(e) => handleChange('baseUrl', e.target.value)}
         />
 
-        <label htmlFor="room-input">Room alias</label>
-        <input
-          id="room-input"
-          type="text"
-          onChange={(e) => handleChange('roomAlias', e.target.value)}
-          value={loginData.roomAlias}
-        ></input>
-
         <label htmlFor="user-input">Matrix user id:</label>
         <input
           autoComplete="username"
-          placeholder="e.g.: @yousefed:matrix.org"
+          placeholder="e.g.: @jacob:matrix.org"
           id="user-input"
           onChange={(e) => handleChange('userId', e.target.value)}
           value={loginData.userId}

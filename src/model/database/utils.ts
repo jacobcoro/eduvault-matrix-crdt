@@ -5,7 +5,6 @@ import { CollectionKey, Room } from './types';
 
 export interface LoginData extends ICreateClientOpts {
   password?: string;
-  roomAlias?: string;
 }
 
 export type MatrixLoginRes = {
@@ -42,7 +41,6 @@ export const checkForExistingRoomAlias = async (
   matrixClient: MatrixClient,
   alias: string
 ) => {
-  const userId = matrixClient.getUserId();
   let existingRoom: { room_id: string } | null = null;
   try {
     console.time('getRoomIdForAlias');

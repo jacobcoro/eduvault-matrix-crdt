@@ -2,12 +2,7 @@ import { useContext, useState } from 'react';
 import styles from './index.module.scss';
 import { StoreContext } from 'model/storeContext';
 import { ConnectStatus } from 'model';
-import {
-  DEV_PASSWORD,
-  DEV_USERNAME,
-  MATRIX_SERVER,
-  TEST_ROOM_ID,
-} from 'config';
+import { DEV_PASSWORD, DEV_USERNAME, MATRIX_SERVER } from 'config';
 import { useRouter } from 'next/router';
 import LoginForm from 'components/LoginForm';
 import { LoginData } from 'model/database/utils';
@@ -25,7 +20,6 @@ const Login = () => {
     baseUrl: MATRIX_SERVER,
     userId: DEV_USERNAME, // these will be empty in prod. This speeds up dev time
     password: DEV_PASSWORD,
-    roomAlias: TEST_ROOM_ID,
   };
   const [loginData, setLoginData] = useState(initialLoginData);
   const handleLogin = () => {
