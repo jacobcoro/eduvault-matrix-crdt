@@ -9,7 +9,7 @@ import {
 } from 'config';
 import { useRouter } from 'next/router';
 import LoginForm from 'components/LoginForm';
-import { LoginData } from 'model/utils';
+import { LoginData } from 'model/database/utils';
 
 const Login = () => {
   const [loginStatus, setLoginStatus] = useState<LoginStatus>('initial');

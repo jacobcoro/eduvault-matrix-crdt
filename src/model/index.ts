@@ -1,2 +1,1 @@
-export * from './store';
-export * from './notes';
+export * from './database';

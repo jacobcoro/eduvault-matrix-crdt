@@ -1,12 +1,13 @@
-import { LoginStatus, StoreContext } from 'model/storeContext';
+import { ConnectStatus } from 'model';
+import { StoreContext } from 'model/storeContext';
 import { useRouter } from 'next/router';
 import { FC, useCallback, useContext, useEffect, useState } from 'react';
 
 const RouteGuard: FC<any> = ({ children }) => {
   const router = useRouter();
   const { loggedIn, login } = useContext(StoreContext);
-  const [loginStatus, setLoginStatus] = useState<LoginStatus>('initial');
-  const onSetLoginStatus = useCallback((status: LoginStatus) => {
+  const [loginStatus, setLoginStatus] = useState<ConnectStatus>('initial');
+  const onSetLoginStatus = useCallback((status: ConnectStatus) => {
     setLoginStatus(status);
   }, []);
 
@@ -17,7 +18,7 @@ const RouteGuard: FC<any> = ({ children }) => {
 
   if (loggedIn || loginStatus === 'ok') return <>{children}</>;
 
-  if (loginStatus === 'loading') return <div>...loading</div>;
+  if (loginStatus === 'loading') return <div>...authenticating</div>;
 
   // if not logged in, but has localStorage, try to login.
   const previousLoginData = localStorage.getItem('loginData');
@@ -25,7 +26,7 @@ const RouteGuard: FC<any> = ({ children }) => {
   if (previousLoginData) {
     const loginData = JSON.parse(previousLoginData);
     login(loginData, onSetLoginStatus);
-    return <div>...loading</div>;
+    return <div>...authenticating</div>;
   } else {
     // if not logged in, and no localStorage, redirect to login page.
     router.push('/login');

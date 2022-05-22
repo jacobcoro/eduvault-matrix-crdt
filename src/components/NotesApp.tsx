@@ -1,6 +1,6 @@
 import { Edit, Trash } from '@styled-icons/fa-solid';
 import { useSyncedStore } from '@syncedstore/react';
-import { Note } from 'model';
+import { Documents, Note } from 'model';
 import { StoreContext } from 'model/storeContext';
 
 import {
@@ -11,20 +11,38 @@ import {
 } from 'react';
 import { ulid } from 'ulid';
 import style from './NotesApp.module.scss';
+
 const NotesApp = () => {
-  const { store } = useContext(StoreContext);
+  const { db } = useContext(StoreContext);
+  let store =
+    db && db.collections.notes[0] ? db.collections.notes[0].store : null;
+
+  const [ready, setReady] = useState(false);
+
+  if (db)
+    db.onRoomConnectStatusUpdate = (status, collection) => {
+      if (status === 'ok' && collection === 'notes') setReady(true);
+    };
+
+  if (!db || !store || JSON.stringify(store) === '{}' || !ready)
+    return <div>...loading collection</div>;
+  return <NotesAppInternal store={db.collections.notes[0].store.documents} />;
+};
+
+const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
   const syncedStore = useSyncedStore(store);
-  const notes = syncedStore.notes as Note[];
+  const notes = syncedStore ?? {};
   const [noteText, setNoteText] = useState('');
   const createNote = (text: string) => {
     const id = ulid();
     const newNote: Note = {
+      _ref: id,
       text,
       _id: id,
       _created: new Date().getTime(),
       _updated: new Date().getTime(),
     };
-    notes.push(newNote);
+    notes[id] = newNote;
   };
   const handleChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
     if (e.target.value) setNoteText(e.target.value);
@@ -57,8 +75,9 @@ const NotesApp = () => {
       </form>
 
       <section>
-        {notes.map(
-          (note) =>
+        {Object.keys(notes).map((_id) => {
+          const note = notes[_id];
+          return (
             note.text &&
             !note._deleted && (
               <div className={style.note} key={note._id}>
@@ -81,7 +100,8 @@ const NotesApp = () => {
                 <p>created: {new Date(note._created).toLocaleTimeString()}</p>
               </div>
             )
-        )}
+          );
+        })}
       </section>
     </div>
   );

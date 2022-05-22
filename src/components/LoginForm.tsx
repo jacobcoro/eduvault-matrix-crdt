@@ -1,10 +1,8 @@
-import { LoginStatus } from 'model/storeContext';
-import { LoginData } from 'model/utils';
-import { ChangeEventHandler } from 'react';
 import style from './LoginForm.module.scss';
+import { LoginData, ConnectStatus } from 'model';
 export interface Props {
   handleLogin: () => void;
-  loginStatus: LoginStatus;
+  loginStatus: ConnectStatus;
   loginData: LoginData;
   setLoginData: (loginData: LoginData) => void;
 }
