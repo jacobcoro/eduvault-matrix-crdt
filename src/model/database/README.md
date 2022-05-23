@@ -1,6 +1,6 @@
 # YouserDB(working title) - A User owned database on top of Matrix-CRDT
 
-`youser-db` empowers developers to quickly create a cloud-synced, local-first, user-owned database.
+`youser-db` empowers developers to quickly create a cloud-synced, local-first, user-owned database, like a decentralized firebase.
 
 Built using [matrix-crdt](https://github.com/YousefED/Matrix-CRDT)
 
