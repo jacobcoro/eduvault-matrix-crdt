@@ -14,38 +14,18 @@ export default function Home() {
         <h1>Welcome to Eduvault</h1>
         <h3>About</h3>
         <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad saepe, at
-          corrupti placeat quis dolorem nihil quos totam voluptatum molestiae
-          quam facilis ducimus, est odit fugiat voluptatibus in. Magnam, ipsum.
+          Eduvault is an interoperable EdTech app. It leverages{' '}
+          <a href="https://matrix.org/">Matrix</a> to provide a user-owned and
+          local-first database. It is currently just a proof of concept.
         </p>
         <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad saepe, at
-          corrupti placeat quis dolorem nihil quos totam voluptatum molestiae
-          quam facilis ducimus, est odit fugiat voluptatibus in. Magnam, ipsum.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad saepe, at
-          corrupti placeat quis dolorem nihil quos totam voluptatum molestiae
-          quam facilis ducimus, est odit fugiat voluptatibus in. Magnam, ipsum.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad saepe, at
-          corrupti placeat quis dolorem nihil quos totam voluptatum molestiae
-          quam facilis ducimus, est odit fugiat voluptatibus in. Magnam, ipsum.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad saepe, at
-          corrupti placeat quis dolorem nihil quos totam voluptatum molestiae
-          quam facilis ducimus, est odit fugiat voluptatibus in. Magnam, ipsum.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad saepe, at
-          corrupti placeat quis dolorem nihil quos totam voluptatum molestiae
-          quam facilis ducimus, est odit fugiat voluptatibus in. Magnam, ipsum.
+          Please consider contributing to the project on{' '}
+          <a href="https://github.com/jacobcoro/eduvault-matrix-crdt">GitHub</a>
+          .
         </p>
 
         <p>
-          <a href="login">Start</a> now
+          <a href="login">Get started</a> now
         </p>
       </main>
     </div>
