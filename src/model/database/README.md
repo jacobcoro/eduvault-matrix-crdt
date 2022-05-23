@@ -1,6 +1,7 @@
 # YouserDB(working title) - A User owned database on top of Matrix-CRDT
 
-This database which is loosely based on a MongoDB style database, allows the developer to quickly create local-first, user-owned databases all from the client.
+`youser-db` empowers developers to quickly create a cloud-synced, local-first, user-owned database.
+
 Built using [matrix-crdt](https://github.com/YousefED/Matrix-CRDT)
 
 features:
@@ -54,6 +55,8 @@ documents can be linked by reference using the document's `_ref` property. The r
 
 To get it working with Matrix-CRDT, YouserDB adds a middle layer between collections and documents called a `room`. Rooms are a group of documents. They correspond to a Matrix room on their Matrix account that is created for each YouserDB `room`. Rooms in YouserDB are private (invite-only) and fully end to end encrypted by default.
 
+The `registry` is a special collection that stores the addresses(`roomAlias`s) to all of the user's other rooms.
+
 # ACL - Access Control, Privacy and Sharing
 
 Building on top of Matrix allows for advanced ACL features right out of the box. All ACL happens on the `room` level. Users can decide which apps or other users have read or write access to which rooms.
@@ -83,6 +86,7 @@ YouserDB also plans to increase user ownership by making backing up and restorin
 - [ ] Tests
 - [ ] Stress testing. warnings about room or document size limits
 - [ ] Backups
+- [ ] File storage
 
 flesh out example:
 
