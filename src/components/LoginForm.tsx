@@ -34,7 +34,7 @@ const LoginForm = ({
           onChange={(e) => handleChange('baseUrl', e.target.value)}
         />
 
-        <label htmlFor="user-input">Matrix user id:</label>
+        <label htmlFor="user-input">Matrix user id: *</label>
         <input
           autoComplete="username"
           placeholder="e.g.: @jacob:matrix.org"
@@ -59,6 +59,11 @@ const LoginForm = ({
         <button disabled={loginStatus === 'loading'} onClick={handleLogin}>
           Login
         </button>
+        <p>
+          {`* Signup at `}
+          <a href="https://app.element.io/">element.io</a> with the username and
+          password option
+        </p>
       </form>
     </div>
   );

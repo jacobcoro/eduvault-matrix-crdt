@@ -33,3 +33,7 @@ input {
   padding: 8px;
   border-radius: 8px;
 }
+
+a {
+  color: var(--secondary);
+}
