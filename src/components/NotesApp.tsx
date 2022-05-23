@@ -128,6 +128,7 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
                     <Trash size={16} />
                   </button>
                   <button
+                    disabled
                     onClick={() => handleEdit(note)}
                     className={style.iconButton}
                   >
@@ -135,8 +136,6 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
                   </button>
                 </div>
                 <p>{note.text}</p>
-                <p>updated: {new Date(note._updated).toLocaleTimeString()}</p>
-                <p>created: {new Date(note._created).toLocaleTimeString()}</p>
               </div>
             )
           );
