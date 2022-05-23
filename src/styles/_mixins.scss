@@ -49,4 +49,8 @@
     color: var(--secondary);
     transform: scale(1.1);
   }
+  &:disabled {
+    background-color: transparent;
+    color: var(--grey-med);
+  }
 }
