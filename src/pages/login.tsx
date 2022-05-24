@@ -4,7 +4,7 @@ import { StoreContext } from 'model/storeContext';
 import { ConnectStatus } from 'model';
 import { DEV_PASSWORD, DEV_USERNAME, MATRIX_SERVER } from 'config';
 import { useRouter } from 'next/router';
-import LoginForm from 'components/LoginForm';
+import LoginForm from 'components/login/LoginForm';
 import { LoginData } from 'model/database/utils';
 
 const Login = () => {

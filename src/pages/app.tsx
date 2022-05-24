@@ -1,6 +1,6 @@
 import dynamic from 'next/dynamic';
-import NotesApp from '../components/NotesApp';
-const RouteGuard = dynamic(() => import('../components/RouteGuard'), {
+import NotesApp from '../components/notes/NotesApp';
+const RouteGuard = dynamic(() => import('../components/base/RouteGuard'), {
   ssr: false,
 });
 const App = () => {

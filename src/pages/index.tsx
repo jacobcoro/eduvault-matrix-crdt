@@ -23,7 +23,10 @@ export default function Home() {
           <a href="https://github.com/jacobcoro/eduvault-matrix-crdt">GitHub</a>
           .
         </p>
-
+        <p>
+          Or contact me through my{' '}
+          <a href="https://jacobcohen-rosenthal.me">website</a>.
+        </p>
         <p>
           <a href="login">Get started</a> now
         </p>
