@@ -9,7 +9,7 @@ features:
 - user owned
 - interoperable
 - local-first
-- full end to end encryption
+- full end to end encryption (coming soon)
 - real-time sync between devices
 - real-time collaboration
 - no backend code
@@ -67,7 +67,7 @@ Matrix currently is a 'federated' system, working towards 100% user-owned and de
 
 The first big difference is that users can sign up using a self-hosted homeserver or a homeserver of their choice that they trust more.
 
-Another key distinction is that with end to end encryption enabled, the homeserver cannot read any of the data.
+Another key distinction is that with end to end encryption enabled(coming soon), the homeserver cannot read any of the data.
 
 A third distinction is because of Matrix's federated model, users could have a second homeserver that connects to each of their rooms, and their data would be stored on both, decreasing centralized control.
 
@@ -83,6 +83,7 @@ YouserDB also plans to increase user ownership by making backing up and restorin
 - [ ] Helper functions like getRegistry, getRoom, getRef
 - [ ] Move Database to standalone repo and publish as a library
 - [ ] Offline mode.
+- [ ] Add encryption
 - [ ] Tests
 - [ ] Stress testing. warnings about room or document size limits
 - [ ] Backups
