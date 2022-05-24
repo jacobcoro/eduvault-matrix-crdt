@@ -12,6 +12,7 @@ import {
   useState,
 } from 'react';
 import { ulid } from 'ulid';
+import { Editor } from './Editor';
 import style from './NotesApp.module.scss';
 
 const NotesApp = () => {
@@ -71,7 +72,7 @@ const NotesApp = () => {
 const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
   const syncedStore = useSyncedStore(store);
   const notes = syncedStore ?? {};
-  const [noteText, setNoteText] = useState('');
+  const [noteText, setNoteText] = useState<string | undefined>();
   const createNote = (text: string) => {
     const id = ulid();
     const newNote: Note = {
@@ -83,9 +84,7 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
     };
     notes[id] = newNote;
   };
-  const handleChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
-    if (e.target.value) setNoteText(e.target.value);
-  };
+
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
     if (noteText) createNote(noteText);
@@ -100,18 +99,10 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
     note._updated = new Date().getTime();
   };
   return (
-    <div className={style.root}>
-      <h1>Notes</h1>
+    <div className="wmde-markdown-var">
+      <Editor value={noteText} onChange={setNoteText} />
 
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="note-input">write your note</label>
-        <textarea
-          value={noteText}
-          id="note-input"
-          onChange={handleChange}
-        ></textarea>
-        <button type="submit"> Create Note</button>
-      </form>
+      <button onClick={handleSubmit}> Create Note</button>
 
       <section>
         {Object.keys(notes).map((_id) => {
