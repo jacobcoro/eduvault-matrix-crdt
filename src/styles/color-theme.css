@@ -1,5 +1,5 @@
 /* Light Mode */
-.root[data-theme='light'] {
+html[data-color-mode='light'] {
   --primary: #f5841f;
   --secondary: #7a48a8;
   --text: #000000;
@@ -13,7 +13,7 @@
 }
 
 /* Dark Mode */
-.root[data-theme='dark'] {
+html[data-color-mode='dark'] {
   --primary: #f39a4d;
   --secondary: #12aabb;
   --text: #ffff;

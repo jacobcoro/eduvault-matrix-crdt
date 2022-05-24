@@ -18,19 +18,19 @@ const useTheme = () => {
   }, []);
 
   const applyTheme = (newTheme: 'light' | 'dark') => {
-    const root = document.getElementById('app-root');
-    if (!root) return;
-
     localStorage.setItem('color-mode', newTheme);
     setTheme(newTheme);
-    if (root.dataset.theme === newTheme) return;
-    root.dataset.theme = newTheme;
+    if (document.documentElement.getAttribute('data-color-mode') === newTheme)
+      return;
+    document.documentElement.setAttribute('data-color-mode', newTheme); //the editor prefers this attribute
   };
 
   const toggleTheme = () => {
-    const root = document.getElementById('app-root');
-    if (!root) return;
-    applyTheme(root.dataset.theme === 'light' ? 'dark' : 'light');
+    applyTheme(
+      document.documentElement.getAttribute('data-color-mode') === 'light'
+        ? 'dark'
+        : 'light'
+    );
   };
 
   return { theme, setTheme: applyTheme, toggleTheme };
