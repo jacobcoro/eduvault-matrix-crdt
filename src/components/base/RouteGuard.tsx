@@ -1,7 +1,7 @@
 import { ConnectStatus } from 'model';
 import { StoreContext } from 'model/storeContext';
 import { useRouter } from 'next/router';
-import { FC, useCallback, useContext, useEffect, useState } from 'react';
+import { FC, useCallback, useContext, useState } from 'react';
 
 const RouteGuard: FC<any> = ({ children }) => {
   const router = useRouter();

@@ -11,7 +11,7 @@ const Login = () => {
   const [loginStatus, setLoginStatus] = useState<ConnectStatus>('initial');
   const onSetLoginStatus = (status: ConnectStatus) => {
     setLoginStatus(status);
-    if (status === 'ok') router.push('/app');
+    if (status === 'ok') router.push('/notes-app');
   };
   const router = useRouter();
   const { login } = useContext(StoreContext);
