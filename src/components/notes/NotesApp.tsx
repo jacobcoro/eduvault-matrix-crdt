@@ -12,7 +12,7 @@ import {
   useState,
 } from 'react';
 import { ulid } from 'ulid';
-import { Editor } from './Editor';
+import { Editor, Viewer } from './Editor';
 import style from './NotesApp.module.scss';
 
 const NotesApp = () => {
@@ -99,17 +99,15 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
     note._updated = new Date().getTime();
   };
   return (
-    <div className="wmde-markdown-var">
-      <Editor value={noteText} onChange={setNoteText} />
-
-      <button onClick={handleSubmit}> Create Note</button>
-
-      <section>
+    <div className={style.root}>
+      <section className={style.notesSection}>
         {Object.keys(notes).map((_id) => {
           const note = notes[_id];
           return (
             note.text &&
             !note._deleted && (
+              // make this a component?
+              // clicking a note once should bring up large viewer, twice split mode and thrice just the editor?
               <div className={style.note} key={note._id}>
                 <div className={style.noteButtonRow}>
                   <button
@@ -126,11 +124,14 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
                     <Edit size={16} />
                   </button>
                 </div>
-                <p>{note.text}</p>
+                <Viewer source={note.text} />
               </div>
             )
           );
         })}
+      </section>
+      <section className={style.editorSection}>
+        <Editor value={noteText} onChange={setNoteText} />
       </section>
     </div>
   );

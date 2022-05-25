@@ -1,5 +1,6 @@
 import type { AppProps } from 'next/app';
-
+import '@uiw/react-md-editor/markdown-editor.css';
+import '@uiw/react-markdown-preview/markdown.css';
 import 'styles/globals.css';
 import { StoreProvider } from 'model/storeContext';
 
