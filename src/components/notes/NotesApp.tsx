@@ -12,6 +12,7 @@ import {
   useState,
 } from 'react';
 import { ulid } from 'ulid';
+import Editor from './Editor';
 import style from './NotesApp.module.scss';
 
 const NotesApp = () => {
@@ -101,6 +102,7 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
   };
   return (
     <div className={style.root}>
+      <Editor />
       <h1>Notes</h1>
 
       <form onSubmit={handleSubmit}>
