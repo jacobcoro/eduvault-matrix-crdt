@@ -14,7 +14,7 @@ const useTheme = () => {
     ) {
       // if true, set the site to Dark Mode
       applyTheme('dark');
-    }
+    } else applyTheme('light');
   }, []);
 
   const applyTheme = (newTheme: 'light' | 'dark') => {
