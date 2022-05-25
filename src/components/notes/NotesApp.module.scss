@@ -3,7 +3,7 @@
 
 .root {
   @include mixins.flex-col;
-  // @include mixins.container;
+  @include mixins.container;
   h1 {
     padding: vars.$spacing * 2;
   }
