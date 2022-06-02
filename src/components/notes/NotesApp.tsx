@@ -2,7 +2,6 @@ import { Edit, Trash } from '@styled-icons/fa-solid';
 import { useSyncedStore } from '@syncedstore/react';
 import { CollectionKey, Documents, Note } from 'model';
 import { StoreContext } from 'model/storeContext';
-
 import {
   ChangeEventHandler,
   FormEventHandler,
@@ -12,9 +11,9 @@ import {
   useState,
 } from 'react';
 import { ulid } from 'ulid';
-import Editor from './Editor';
 import style from './NotesApp.module.scss';
-
+import PlateEditor from './Editor/PlateEditor';
+// const DynamicComponent = dynamic(() => import('./Editor/PlateEditor'));
 const NotesApp = () => {
   const { db } = useContext(StoreContext);
   let store =
@@ -102,7 +101,7 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
   };
   return (
     <div className={style.root}>
-      <Editor />
+      <PlateEditor />
       <h1>Notes</h1>
 
       <form onSubmit={handleSubmit}>
