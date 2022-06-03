@@ -3,8 +3,8 @@ import { useSyncedStore } from '@syncedstore/react';
 import Editor, { OnEditorChange } from 'components/Editor';
 import { CollectionKey, Documents, Note } from 'model';
 import { StoreContext } from 'model/storeContext';
+
 import {
-  ChangeEventHandler,
   FormEventHandler,
   useCallback,
   useContext,
@@ -13,9 +13,7 @@ import {
 } from 'react';
 import { ulid } from 'ulid';
 import style from './NotesApp.module.scss';
-
-const initialMarkdown =
-  '# Welcome to SyncedStore\n\nThis is a simple markdown editor.\n\n';
+const initialMarkdown = `# Write a note`;
 
 const NotesApp = () => {
   const { db } = useContext(StoreContext);
@@ -75,6 +73,7 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
   const syncedStore = useSyncedStore(store);
   const notes = syncedStore ?? {};
   const [noteText, setNoteText] = useState(initialMarkdown);
+
   const createNote = (text: string) => {
     const id = ulid();
     const newNote: Note = {
@@ -86,25 +85,25 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
     };
     notes[id] = newNote;
   };
+
   const handleChange: OnEditorChange = (markdown) => {
     // if (markdown) setNoteText(markdown);
   };
-  const handleSubmit: FormEventHandler = (e) => {
-    e.preventDefault();
-    if (noteText) createNote(noteText);
-    setNoteText('');
-  };
+
   const handleDelete = (note: Note) => {
     note._deleted = true;
     note._ttl = new Date().getTime() + 1000 * 60 * 60 * 24 * 30;
   };
-  const handleEdit = (note: Note) => {
-    // TODO: open editor
-    note._updated = new Date().getTime();
-  };
+
   return (
     <div className={style.root}>
-      <section>
+      <section className={style.notesListSection}>
+        <button
+          onClick={() => createNote('new note')}
+          className={style.iconButton}
+        >
+          <Edit size={22} />
+        </button>
         {Object.keys(notes).map((_id) => {
           const note = notes[_id];
           return (
