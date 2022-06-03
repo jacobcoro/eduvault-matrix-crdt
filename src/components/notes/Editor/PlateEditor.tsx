@@ -36,7 +36,7 @@ import {
 } from '@udecode/plate';
 import { Image } from '@styled-icons/material/Image';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { EditableProps } from 'slate-react/dist/components/editable';
 import { autoformatRules } from './autoformat/autoformatRules';
 import {
@@ -52,6 +52,7 @@ import { Link } from '@styled-icons/material/Link';
 import { CONFIG } from './config';
 import { getTPlateSelectors, MyEditor, MyValue } from './typescript';
 import { OndemandVideo } from '@styled-icons/material/OndemandVideo';
+import { serialize } from 'remark-slate';
 
 const initialValue: MyValue = [
   {
@@ -63,7 +64,9 @@ const initialValue: MyValue = [
     ],
   },
 ];
-
+const onChange = (v: string) => {
+  console.log(v);
+};
 const PlateEditor = () => {
   // try to remove some plugins!
   const [debugValue, setDebugValue] = useState('');
@@ -78,24 +81,31 @@ const PlateEditor = () => {
   }, [editor]);
   console.info(editor);
 
+  const handleChange = (nextValue: MyValue) => {
+    setValue(nextValue);
+    // serialize slate state to a markdown string
+    onChange(value.map((v: any) => serialize(v)).join(''));
+  };
+
   return (
     <Plate<MyValue, MyEditor>
       id="editor-1"
       editableProps={CONFIG.editableProps as any}
       initialValue={initialValue}
       plugins={PLUGINS as any}
-      onChange={(v: any) => setValue(v)}
+      onChange={handleChange}
       value={value}
     >
       <HeadingToolbar>
-        {/* <BasicElementToolbarButtons /> <ListToolbarButtons /> */}
-        {/* <IndentToolbarButtons />  */}
+        <BasicElementToolbarButtons />
+        <ListToolbarButtons />
+        <IndentToolbarButtons />
         <BasicMarkToolbarButtons />
         {/* <AlignToolbarButtons /> */}
         <LinkToolbarButton icon={<Link />} />{' '}
         <ImageToolbarButton icon={<Image aria-label="image-embed" />} />
         <MediaEmbedToolbarButton icon={<OndemandVideo />} />
-        {/* <TableToolbarButtons /> */}
+        <TableToolbarButtons />
       </HeadingToolbar>
     </Plate>
   );

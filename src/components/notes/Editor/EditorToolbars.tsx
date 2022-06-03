@@ -184,7 +184,7 @@ export const BasicMarkToolbarButtons = () => {
         type={getPluginType(editor, MARK_CODE)}
         icon={<CodeAlt />}
       />
-      <MarkToolbarButton
+      {/* <MarkToolbarButton
         type={getPluginType(editor, MARK_SUPERSCRIPT)}
         clear={getPluginType(editor, MARK_SUBSCRIPT)}
         icon={<Superscript />}
@@ -193,7 +193,7 @@ export const BasicMarkToolbarButtons = () => {
         type={getPluginType(editor, MARK_SUBSCRIPT)}
         clear={getPluginType(editor, MARK_SUPERSCRIPT)}
         icon={<Subscript />}
-      />
+      /> */}
     </>
   );
 };
