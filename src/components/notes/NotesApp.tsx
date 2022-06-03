@@ -13,8 +13,10 @@ import {
 } from 'react';
 import { ulid } from 'ulid';
 import style from './NotesApp.module.scss';
-import PlateEditor from './Editor/PlateEditor';
-// const DynamicComponent = dynamic(() => import('./Editor/PlateEditor'));
+
+const initialMarkdown =
+  '# Welcome to SyncedStore\n\nThis is a simple markdown editor.\n\n';
+
 const NotesApp = () => {
   const { db } = useContext(StoreContext);
   let store =
@@ -102,19 +104,6 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
   };
   return (
     <div className={style.root}>
-      <PlateEditor />
-      <h1>Notes</h1>
-
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="note-input">write your note</label>
-        <textarea
-          value={noteText}
-          id="note-input"
-          onChange={handleChange}
-        ></textarea>
-        <button type="submit"> Create Note</button>
-      </form>
-
       <section>
         {Object.keys(notes).map((_id) => {
           const note = notes[_id];
