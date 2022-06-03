@@ -1,5 +1,6 @@
 import { Edit, Trash } from '@styled-icons/fa-solid';
 import { useSyncedStore } from '@syncedstore/react';
+import Editor, { OnEditorChange } from 'components/Editor';
 import { CollectionKey, Documents, Note } from 'model';
 import { StoreContext } from 'model/storeContext';
 import {
@@ -71,7 +72,7 @@ const NotesApp = () => {
 const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
   const syncedStore = useSyncedStore(store);
   const notes = syncedStore ?? {};
-  const [noteText, setNoteText] = useState('');
+  const [noteText, setNoteText] = useState(initialMarkdown);
   const createNote = (text: string) => {
     const id = ulid();
     const newNote: Note = {
@@ -83,8 +84,8 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
     };
     notes[id] = newNote;
   };
-  const handleChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
-    if (e.target.value) setNoteText(e.target.value);
+  const handleChange: OnEditorChange = (markdown) => {
+    // if (markdown) setNoteText(markdown);
   };
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
@@ -128,19 +129,15 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
                   >
                     <Trash size={16} />
                   </button>
-                  <button
-                    disabled
-                    onClick={() => handleEdit(note)}
-                    className={style.iconButton}
-                  >
-                    <Edit size={16} />
-                  </button>
                 </div>
                 <p>{note.text}</p>
               </div>
             )
           );
         })}
+      </section>
+      <section className={style.editorSection}>
+        <Editor onChange={handleChange} content={noteText} />
       </section>
     </div>
   );

@@ -2,7 +2,7 @@ import type { AppProps } from 'next/app';
 
 import 'styles/globals.css';
 import { StoreProvider } from 'model/storeContext';
-
+import 'material-icons/iconfont/material-icons.css';
 import NavBar from 'components/base/NavBar';
 import Footer from 'components/base/Footer';
 

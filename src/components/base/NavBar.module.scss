@@ -6,6 +6,7 @@
   top: 0;
   width: 100%;
   background-color: var(--secondary);
+  z-index: 1000;
 
   a {
     color: white;
@@ -15,6 +16,8 @@
   nav {
     @include mixins.container;
     display: flex;
+    height: vars.$spacing * 6.5;
+    align-items: center;
   }
 
   ul {
