@@ -1,5 +1,6 @@
 import { Edit, Trash } from '@styled-icons/fa-solid';
 import { useSyncedStore } from '@syncedstore/react';
+import Editor from 'components/Editor';
 import { CollectionKey, Documents, Note } from 'model';
 import { StoreContext } from 'model/storeContext';
 
@@ -102,6 +103,7 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
   return (
     <div className={style.root}>
       <h1>Notes</h1>
+      <Editor />
 
       <form onSubmit={handleSubmit}>
         <label htmlFor="note-input">write your note</label>
