@@ -102,7 +102,7 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
           onClick={() => createNote('new note')}
           className={style.iconButton}
         >
-          <Edit size={22} />
+          <Edit size={28} />
         </button>
         {Object.keys(notes).map((_id) => {
           const note = notes[_id];
