@@ -10,7 +10,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from 'react';
 import { ulid } from 'ulid';
@@ -35,13 +34,10 @@ const initialContext: INotesContext = {
 };
 export const NotesContext = createContext(initialContext);
 
-// problem: we need the onChange to be shared between the editor and the notes list, but the we dont want the editor to be re-rendered every time the notes object changes
-
 export const NotesProvider: FC<{ children: any; db: Database }> = ({
   children,
   db,
 }) => {
-  console.log('notes-provider render');
   const notesStore = db.collections.notes[0].store.documents;
 
   const notes = useSyncedStore(notesStore);
@@ -112,7 +108,6 @@ const NotesApp = () => {
     // connect each note room
     const notesKeysList = Object.keys(notesRegistry);
 
-    console.log({ notesKeysList });
     if (notesKeysList.length === 0) {
       await db.createAndConnectRoom(
         CollectionKey.notes,
@@ -128,7 +123,6 @@ const NotesApp = () => {
       );
       const promises = noteRoomData.map((room) => {
         return async () => {
-          console.log('connecting room', room.roomAlias);
           await db.connectRoom(db.collections.notes[room.roomId]);
         };
       });
@@ -147,7 +141,6 @@ const NotesApp = () => {
       }
     };
   }
-  let notesStore = null;
 
   if (db && store && JSON.stringify(store) !== '{}' && ready)
     return (
@@ -157,8 +150,6 @@ const NotesApp = () => {
     );
   return <div>loading collections...</div>;
 };
-
-// build a notes context. use it only in the notes list. The setNote function will be shared between the editor and the list. only the list updates the context. That way the editor won't keep rerendering.
 
 const NotesList = () => {
   const { createNote, notes, handleSelectNote, handleDelete } =
@@ -200,9 +191,6 @@ const NotesList = () => {
 };
 
 const NotesAppInternal = () => {
-  // not dynamic, just sets the initial text for the currently editing note
-
-  console.log('notes-app-internal render');
   return (
     <div className={style.root}>
       <section className={style.notesListSection}>
