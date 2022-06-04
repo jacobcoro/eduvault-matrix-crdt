@@ -38,6 +38,7 @@
 }
 
 .note {
+  cursor: pointer;
   @include mixins.card;
   @include mixins.flex-col;
   position: relative;

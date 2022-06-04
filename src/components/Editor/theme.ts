@@ -5,9 +5,9 @@ const myTheme = nord.override((emotion, manager) => {
   manager.set(ThemeColor, ([key, opacity]) => {
     switch (key) {
       case 'primary':
-        return `var(--secondary)`;
-      case 'secondary':
         return `var(--primary)`;
+      case 'secondary':
+        return `var(--secondary)`;
       case 'neutral':
         return `var(--text)`;
       case 'solid':

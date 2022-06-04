@@ -40,16 +40,11 @@ export const createEditor = (
       }));
       ctx
         .get(listenerCtx)
-        .markdownUpdated((_, markdown) => {
-          onChange?.(markdown);
+        .markdownUpdated((_, markdown, prevMarkdown) => {
+          if (markdown !== prevMarkdown) onChange?.(markdown);
         })
         .mounted(async (ctx) => {
           setEditorReady(true);
-          //   if (import.meta.env.DEV) {
-          //     const view = ctx.get(editorViewCtx);
-          //     const prosemirrorDevTools = await import('prosemirror-dev-tools');
-          //     prosemirrorDevTools.default(view);
-          //   }
         });
     })
     .use(emoji)
