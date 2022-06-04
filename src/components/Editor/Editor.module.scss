@@ -19,12 +19,23 @@
       > div {
         width: 100%;
       }
-      div:nth-child(1) {
+      // buttons bar
+      > div:nth-child(1) {
+        span {
+          font-size: 1.3rem;
+        }
         min-height: 62px;
         align-items: center;
       }
-      div:nth-child(2) {
+      // editor wrapper
+      > div:nth-child(2) {
         flex-grow: 1;
+        // tooltip bubble menu
+        > div:nth-child(8) {
+          span {
+            font-size: 1rem;
+          }
+        }
       }
     }
   }

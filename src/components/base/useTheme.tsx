@@ -2,6 +2,27 @@ import { useEffect, useState } from 'react';
 
 export type Themes = 'light' | 'dark';
 
+const code = {
+  // light: 'https://unpkg.com/prism-themes/themes/prism-material-light.css',
+  light: 'https://unpkg.com/prism-themes/themes/prism-vs.css',
+  dark: 'https://unpkg.com/prism-themes/themes/prism-vsc-dark-plus.css',
+};
+
+const setSyntaxHighlightStyleLink = (theme: Themes) => {
+  const target = document.querySelector('#prism-theme');
+
+  if (target) {
+    return target;
+  }
+
+  const link = document.createElement('link');
+  link.id = 'prism-theme';
+  link.setAttribute('rel', 'stylesheet');
+  document.head.appendChild(link);
+
+  link.setAttribute('href', theme === 'dark' ? code.dark : code.light);
+};
+
 const useTheme = () => {
   // This code assumes a Light Mode default (set data-theme="light" on index.html)
   const [theme, setTheme] = useState<Themes>('light');
@@ -25,6 +46,7 @@ const useTheme = () => {
     if (document.documentElement.getAttribute('data-color-mode') === newTheme)
       return;
     document.documentElement.setAttribute('data-color-mode', newTheme); //the editor prefers this attribute
+    setSyntaxHighlightStyleLink(newTheme);
   };
 
   const toggleTheme = () => {
