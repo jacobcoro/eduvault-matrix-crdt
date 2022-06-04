@@ -26,6 +26,12 @@
         }
         min-height: 62px;
         align-items: center;
+        &::-webkit-scrollbar {
+          height: 6px;
+        }
+        &::-webkit-scrollbar-thumb {
+          border-radius: 0;
+        }
       }
       // editor wrapper
       > div:nth-child(2) {

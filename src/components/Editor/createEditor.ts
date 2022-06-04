@@ -2,7 +2,6 @@
 import {
   defaultValueCtx,
   Editor,
-  editorViewCtx,
   editorViewOptionsCtx,
   rootCtx,
 } from '@milkdown/core';
@@ -20,7 +19,7 @@ import { slash } from '@milkdown/plugin-slash';
 import { tooltip } from '@milkdown/plugin-tooltip';
 import { upload } from '@milkdown/plugin-upload';
 import { gfm } from '@milkdown/preset-gfm';
-import { nord } from '@milkdown/theme-nord';
+import myTheme from './theme';
 
 // import { codeSandBox } from './codeSandBox';
 
@@ -67,7 +66,7 @@ export const createEditor = (
     // .use(diagram)
     .use(tooltip)
     .use(slash)
-    .use(nord)
+    .use(myTheme)
     .use(menu);
 
   return editor;
