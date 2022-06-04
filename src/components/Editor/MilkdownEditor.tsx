@@ -3,11 +3,11 @@ import { Slice } from '@milkdown/prose/model';
 import { EditorRef, ReactEditor, useEditor } from '@milkdown/react';
 import { nordDark, nordLight } from '@milkdown/theme-nord';
 import { switchTheme } from '@milkdown/utils';
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useContext } from 'react';
 
 import { createEditor } from './createEditor';
 import { Content, useLazy } from './useLazy';
-import useTheme from '../base/useTheme';
+import { ThemeContext } from 'components/base/ThemeContext';
 type Props = {
   content: Content;
   readOnly?: boolean;
@@ -21,9 +21,8 @@ const MarkdownEditor = forwardRef<MarkdownEditorRef, Props>(
   ({ content, readOnly, onChange }, ref) => {
     const editorRef = React.useRef<EditorRef>(null);
     const [editorReady, setEditorReady] = React.useState(false);
-    const { theme } = useTheme();
-    const isDarkMode = theme === 'dark';
-
+    const { theme } = useContext(ThemeContext);
+    console.log({ theme });
     const [loading, md] = useLazy(content);
 
     React.useImperativeHandle(ref, () => ({
@@ -54,11 +53,12 @@ const MarkdownEditor = forwardRef<MarkdownEditorRef, Props>(
     );
 
     React.useEffect(() => {
+      console.log({ theme });
       if (!editorReady || !editorRef.current) return;
       const editor = editorRef.current.get();
       if (!editor) return;
-      editor.action(switchTheme(isDarkMode ? nordDark : nordLight));
-    }, [editorReady, isDarkMode]);
+      editor.action(switchTheme(theme === 'dark' ? nordDark : nordLight));
+    }, [editorReady, theme]);
 
     return loading ? <div /> : <ReactEditor ref={editorRef} editor={editor} />;
   }

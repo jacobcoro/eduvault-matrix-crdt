@@ -1,9 +1,10 @@
-import useTheme from './useTheme';
 import styles from './NavBar.module.scss';
 import Link from 'next/link';
 import { Moon, Sun } from '@styled-icons/fa-solid';
+import { useContext } from 'react';
+import { ThemeContext } from './ThemeContext';
 const NavBar = () => {
-  const { toggleTheme, theme } = useTheme();
+  const { toggleTheme, theme } = useContext(ThemeContext);
   return (
     <div className={styles.root}>
       <nav>

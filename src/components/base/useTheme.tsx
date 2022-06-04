@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 
+export type Themes = 'light' | 'dark';
+
 const useTheme = () => {
   // This code assumes a Light Mode default (set data-theme="light" on index.html)
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState<Themes>('light');
 
   // find initial theme
   useEffect(() => {
@@ -17,7 +19,7 @@ const useTheme = () => {
     } else applyTheme('light');
   }, []);
 
-  const applyTheme = (newTheme: 'light' | 'dark') => {
+  const applyTheme = (newTheme: Themes) => {
     localStorage.setItem('color-mode', newTheme);
     setTheme(newTheme);
     if (document.documentElement.getAttribute('data-color-mode') === newTheme)
@@ -33,6 +35,10 @@ const useTheme = () => {
     );
   };
 
-  return { theme, setTheme: applyTheme, toggleTheme };
+  return {
+    theme,
+    setTheme: applyTheme,
+    toggleTheme,
+  };
 };
 export default useTheme;
