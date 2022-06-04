@@ -36,6 +36,12 @@
       // editor wrapper
       > div:nth-child(2) {
         flex-grow: 1;
+        > div:nth-child(1) {
+          padding-top: 0;
+          > *:nth-child(1) {
+            margin-top: vars.$spacing * 1;
+          }
+        }
         // tooltip bubble menu
         > div:nth-child(8) {
           span {
