@@ -2,7 +2,8 @@ import React, { useContext } from 'react';
 
 import dynamic from 'next/dynamic';
 import styles from './Editor.module.scss';
-import { NotesContext } from 'components/notes/NotesApp';
+import { NotesContext } from 'components/notes/NotesContext';
+
 const Editor = dynamic(() => import('./MilkdownEditor'), { ssr: false });
 
 export type OnEditorChange = (markdown: string) => void;
