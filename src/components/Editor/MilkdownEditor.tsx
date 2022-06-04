@@ -6,7 +6,7 @@ import React, { forwardRef } from 'react';
 
 import { createEditor } from './createEditor';
 import { Content, useLazy } from './useLazy';
-type Props = {
+export type Props = {
   content: Content;
   readOnly?: boolean;
   onChange?: (markdown: string) => void;

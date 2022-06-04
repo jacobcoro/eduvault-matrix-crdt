@@ -118,7 +118,7 @@ const NotesAppInternal = ({ store }: { store: Documents<Note> }) => {
                     <Trash size={16} />
                   </button>
                 </div>
-                <p>{note.text}</p>
+                <Editor readOnly content={note.text} />{' '}
               </div>
             )
           );

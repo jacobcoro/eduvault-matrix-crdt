@@ -55,6 +55,7 @@
 }
 
 .noteButtonRow {
+  z-index: 100;
   @include mixins.flex-row;
   justify-content: space-between;
   position: absolute;
