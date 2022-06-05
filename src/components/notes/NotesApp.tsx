@@ -1,5 +1,5 @@
 import Editor from 'components/Editor';
-import { CollectionKey } from 'model';
+import { CollectionKey, Database } from 'model';
 import { StoreContext } from 'model/storeContext';
 
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -54,23 +54,49 @@ const NotesApp = () => {
       }
     };
   }
+  // const [selectedRoom, setSelectedRoom] = useState<string>('');
 
   if (db && store && JSON.stringify(store) !== '{}' && ready)
-    return (
-      <NotesProvider db={db}>
-        <NotesAppInternal />
-      </NotesProvider>
-    );
-  return <div>loading collections...</div>;
+    return <NotesAppInternal db={db} />;
+  return <div>...loading collections</div>;
 };
 
-const NotesAppInternal = () => {
+const RoomsList = ({ db }: { db: Database }) => {
+  const rooms = db.collections.notes;
+  const keys = Object.keys(rooms);
+  console.log({ keys });
+  return (
+    <>
+      {keys.map((room) => {
+        return (
+          <NotesProvider notesStore={rooms[room].store.documents}>
+            <button>
+              <h3>{rooms[room].name ?? rooms[room].roomAlias}</h3>
+              <hr></hr>
+            </button>
+            <NotesList />
+          </NotesProvider>
+        );
+      })}
+    </>
+  );
+};
+
+const NotesAppInternal = ({
+  selectedRoom,
+  db,
+}: {
+  selectedRoom?: string;
+  db: Database;
+}) => {
   return (
     <div className={style.root}>
       <section className={style.notesListSection}>
-        <NotesList />
+        {/* noteslist has entire db */}
+        <RoomsList db={db} />
       </section>
       <section className={style.editorSection}>
+        {/* editor just has notes provider of selected room */}
         <Editor />
       </section>
     </div>

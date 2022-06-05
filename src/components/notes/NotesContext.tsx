@@ -35,12 +35,10 @@ const initialContext: INotesContext = {
 
 export const NotesContext = createContext(initialContext);
 
-export const NotesProvider: FC<{ children: any; db: Database }> = ({
-  children,
-  db,
-}) => {
-  const notesStore = db.collections.notes[0].store.documents;
-
+export const NotesProvider: FC<{
+  children: any;
+  notesStore: Documents<Note>;
+}> = ({ children, notesStore }) => {
   const notes = useSyncedStore(notesStore);
 
   const handleDelete = (note: Note) => {
