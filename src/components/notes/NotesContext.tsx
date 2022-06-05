@@ -4,7 +4,7 @@ import { Database, Documents, Note } from 'model';
 
 import { createContext, FC, useCallback, useState } from 'react';
 
-export const initialMarkdown = `# Write a note`;
+export const initialMarkdown = `### Write a note`;
 export const formatNewNote = (text: string, id: string) => {
   const newNote: Note = {
     _ref: id, // todo: use create ref
