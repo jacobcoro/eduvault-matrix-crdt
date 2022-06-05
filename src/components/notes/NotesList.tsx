@@ -9,9 +9,7 @@ const NotesList = () => {
   const { createNote, notes, handleSelectNote, handleDelete } =
     useContext(NotesContext);
 
-  const notesLength = notes
-    ? Object.values(notes).filter((note) => !note._deleted).length
-    : 0;
+  const notesLength = notes ? Object.values(notes).length : 0;
   if (!notes) return <div></div>;
   return (
     <>
