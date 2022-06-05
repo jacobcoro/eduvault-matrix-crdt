@@ -12,20 +12,6 @@
   overflow: auto;
 }
 
-button {
-  background-color: var(--primary);
-  color: white;
-  padding: 8 * 1px;
-  padding-left: 8 * 2px;
-  padding-right: 8 * 2px;
-  cursor: pointer;
-}
-
-button:disabled {
-  background-color: var(--grey-med);
-  cursor: not-allowed;
-}
-
 input {
   background-color: var(--bg);
   background-image: none;
