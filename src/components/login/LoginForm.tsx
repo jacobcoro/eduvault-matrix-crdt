@@ -60,7 +60,7 @@ const LoginForm = ({
           Login
         </button>
         <p>
-          {`* Signup at `}
+          {`* Sign up at `}
           <a href="https://app.element.io/">element.io</a> with the username and
           password option
         </p>
