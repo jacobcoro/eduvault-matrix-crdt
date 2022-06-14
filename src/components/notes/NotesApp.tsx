@@ -6,6 +6,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import style from './NotesApp.module.scss';
 import { NotesProvider } from './NotesContext';
 import NotesList from './NotesList';
+import RoomsList from './RoomsList';
 
 const NotesApp = () => {
   const { db } = useContext(StoreContext);
@@ -59,27 +60,6 @@ const NotesApp = () => {
   if (db && store && JSON.stringify(store) !== '{}' && ready)
     return <NotesAppInternal db={db} />;
   return <div>...loading collections</div>;
-};
-
-const RoomsList = ({ db }: { db: Database }) => {
-  const rooms = db.collections.notes;
-  const keys = Object.keys(rooms);
-  console.log({ keys });
-  return (
-    <>
-      {keys.map((room) => {
-        return (
-          <NotesProvider notesStore={rooms[room].store.documents}>
-            <button>
-              <h3>{rooms[room].name ?? rooms[room].roomAlias}</h3>
-              <hr></hr>
-            </button>
-            <NotesList />
-          </NotesProvider>
-        );
-      })}
-    </>
-  );
 };
 
 const NotesAppInternal = ({
