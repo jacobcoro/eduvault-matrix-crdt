@@ -4,8 +4,7 @@ import { StoreContext } from 'model/storeContext';
 
 import { useCallback, useContext, useEffect, useState } from 'react';
 import style from './NotesApp.module.scss';
-import { NotesProvider } from './NotesContext';
-import NotesList from './NotesList';
+
 import RoomsList from './RoomsList';
 
 const NotesApp = () => {
