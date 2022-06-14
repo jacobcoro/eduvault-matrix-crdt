@@ -43,7 +43,8 @@ export const createAndConnectRoom =
         newNoteRoomAlias
       );
 
-      return await _db.connectRoom(_db.collections.notes[0]);
+      await _db.connectRoom(_db.collections.notes[0]);
+      return index.toString();
     } catch (error) {
       console.error(error);
       return false;

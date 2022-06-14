@@ -1,10 +1,17 @@
 import { CaretDown, CaretRight, PlusSquare } from '@styled-icons/fa-solid';
 import { Database, Note, Room } from 'model';
-import { useState } from 'react';
+import { StoreContext } from 'model/storeContext';
+import { useContext, useEffect, useState } from 'react';
 import { NotesProvider } from './NotesContext';
 import NotesList from './NotesList';
 import styles from './RoomsList.module.scss';
-const RoomsList = ({ db }: { db: Database }) => {
+const RoomsList = ({
+  db,
+  selectedRoom,
+}: {
+  db: Database;
+  selectedRoom: string;
+}) => {
   const rooms = db.collections.notes;
   const roomKeys = Object.keys(rooms);
   return (
@@ -18,8 +25,12 @@ const RoomsList = ({ db }: { db: Database }) => {
       </div>
 
       <>
-        {roomKeys.map((roomKey, index) => (
-          <RoomsListItem key={roomKey} room={rooms[roomKey]} index={index} />
+        {roomKeys.map((roomKey) => (
+          <RoomsListItem
+            key={roomKey}
+            room={rooms[roomKey]}
+            isSelectedRoom={selectedRoom === roomKey}
+          />
         ))}
       </>
     </div>
@@ -28,16 +39,28 @@ const RoomsList = ({ db }: { db: Database }) => {
 
 const RoomsListItem = ({
   room,
-  index,
+  isSelectedRoom,
 }: {
   room: Room<Note>;
-  index: number;
+  isSelectedRoom: boolean;
 }) => {
-  const [show, setShow] = useState(index === 0); //show first room by default
+  const { db } = useContext(StoreContext);
+  const [userId, setUserId] = useState<string>();
+  useEffect(() => {
+    const getMe = async () => {
+      const res = await db?.matrixClient?.whoami();
+      if (res) setUserId(res.user_id.split('@')[1]);
+    };
+    getMe();
+  }, [db, db?.matrixClient]);
+  const [show, setShow] = useState(isSelectedRoom);
+  let cleanedAlias = userId
+    ? room.roomAlias.split(`_${userId}`)[0].slice(1)
+    : room.roomAlias.slice(1);
+
   const shortenedAlias =
-    room.roomAlias.length > 30
-      ? room.roomAlias.slice(0, 30) + '...'
-      : room.roomAlias;
+    cleanedAlias.length > 30 ? cleanedAlias.slice(0, 30) + '...' : cleanedAlias;
+
   const roomName = room.name ?? shortenedAlias;
   return (
     <NotesProvider notesStore={room.store.documents}>

@@ -4,6 +4,7 @@ import { StoreContext } from 'model/storeContext';
 
 import { useCallback, useContext, useEffect, useState } from 'react';
 import style from './NotesApp.module.scss';
+import { NotesProvider } from './NotesContext';
 
 import RoomsList from './RoomsList';
 
@@ -13,6 +14,7 @@ const NotesApp = () => {
     db && db.collections.notes[0] ? db.collections.notes[0].store : null;
 
   const [ready, setReady] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState<string>('0');
   const connectRoomsOrCreateDefaultRoom = useCallback(async () => {
     if (!db) return null;
 
@@ -22,16 +24,14 @@ const NotesApp = () => {
     const notesKeysList = Object.keys(notesRegistry);
 
     if (notesKeysList.length === 0) {
-      await db.createAndConnectRoom(
+      const index = await db.createAndConnectRoom(
         CollectionKey.notes,
         'notes-default',
         'Default Notes Collection'
       );
+      if (index) setSelectedRoom(index);
     } else {
-      const noteRoomsRegistryKeys = Object.keys(
-        db.collections.registry[0].store.documents[0].notes
-      );
-      const noteRoomData = noteRoomsRegistryKeys.map(
+      const noteRoomData = notesKeysList.map(
         (key) => db.collections.registry[0].store.documents[0].notes[key]
       );
       const promises = noteRoomData.map((room) => {
@@ -40,6 +40,7 @@ const NotesApp = () => {
         };
       });
       await Promise.all(promises);
+      setSelectedRoom(notesKeysList[0]);
     }
   }, [db]);
 
@@ -54,10 +55,9 @@ const NotesApp = () => {
       }
     };
   }
-  // const [selectedRoom, setSelectedRoom] = useState<string>('');
 
   if (db && store && JSON.stringify(store) !== '{}' && ready)
-    return <NotesAppInternal db={db} />;
+    return <NotesAppInternal db={db} selectedRoom={selectedRoom} />;
   return <div>...loading collections</div>;
 };
 
@@ -65,18 +65,22 @@ const NotesAppInternal = ({
   selectedRoom,
   db,
 }: {
-  selectedRoom?: string;
+  selectedRoom: string;
   db: Database;
 }) => {
   return (
     <div className={style.root}>
       <section className={style.notesListSection}>
-        {/* noteslist has entire db */}
-        <RoomsList db={db} />
+        {/* RoomsList has entire db */}
+        <RoomsList db={db} selectedRoom={selectedRoom} />
       </section>
       <section className={style.editorSection}>
         {/* editor just has notes provider of selected room */}
-        <Editor />
+        <NotesProvider
+          notesStore={db.collections.notes[selectedRoom].store.documents}
+        >
+          <Editor />
+        </NotesProvider>
       </section>
     </div>
   );
