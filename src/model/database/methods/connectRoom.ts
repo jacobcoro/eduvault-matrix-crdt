@@ -12,7 +12,7 @@ export const connectRoom = (_db: Database) =>
     /** Only pass this when creating the registry itself */
     registryConnect?: true
   ) {
-    return new Promise<boolean>((resolve, reject) => {
+    return new Promise<boolean>(async (resolve, reject) => {
       try {
         _db.collections[room.collectionKey][room._id].connectStatus = 'loading';
 
@@ -25,9 +25,8 @@ export const connectRoom = (_db: Database) =>
         }
         const store = syncedStore({ documents: {} });
         const doc = getYjsValue(store) as Y.Doc;
-
+        console.log({ store, doc, room });
         // todo: do we also need to register the localStorage provider here too?
-
         room.matrixProvider = newMatrixProvider({
           doc,
           matrixClient: _db.matrixClient,
@@ -35,7 +34,7 @@ export const connectRoom = (_db: Database) =>
         });
 
         // connect or fail callbacks:
-        room.matrixProvider?.onDocumentAvailable(async (e) => {
+        room.matrixProvider.onDocumentAvailable(async (e) => {
           _db.collections[room.collectionKey][room._id].doc = doc;
           _db.collections[room.collectionKey][room._id].store = store;
 

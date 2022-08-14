@@ -7,7 +7,7 @@ import {
   truncateRoomAlias,
 } from '..';
 
-/** pass in undecorated alias. if the final will be # `#alias_username:matrix.org' just pass alias */
+/** pass in undecorated alias. if the final will be # `#<alias>_<username>:matrix.org' just pass <alias> */
 export const createAndConnectRoom =
   (_db: Database) =>
   async (
@@ -25,16 +25,18 @@ export const createAndConnectRoom =
       );
       const newNoteRoomAliasTruncated = truncateRoomAlias(newNoteRoomAlias);
       try {
-        const result = await createRoom(
+        const createRoomResult = await createRoom(
           _db.matrixClient,
           newNoteRoomAliasTruncated,
           name,
           topic
         );
+        console.log({ createRoomResult });
       } catch (error: any) {
-        if (JSON.stringify(error).includes('M_ROOM_IN_USE'))
+        if (JSON.stringify(error).includes('M_ROOM_IN_USE')) {
           console.log('room already exists');
-        else throw error;
+          await _db.matrixClient.joinRoom(_db.collections.notes[0].roomAlias);
+        } else throw error;
       }
       const index = Object.keys(_db.collections[collectionKey]).length;
       _db.collections[collectionKey][index] = newEmptyRoom<any>(

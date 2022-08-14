@@ -15,6 +15,7 @@ const NotesApp = () => {
 
   const [ready, setReady] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState<string>('0');
+  console.log({ store, db });
   const connectRoomsOrCreateDefaultRoom = useCallback(async () => {
     if (!db) return null;
 
@@ -24,6 +25,7 @@ const NotesApp = () => {
     const notesKeysList = Object.keys(notesRegistry);
 
     if (notesKeysList.length === 0) {
+      console.log('no notes rooms found, creating default room');
       const index = await db.createAndConnectRoom(
         CollectionKey.notes,
         'notes-default',

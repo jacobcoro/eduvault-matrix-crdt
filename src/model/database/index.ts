@@ -1,6 +1,7 @@
 import { MatrixClient } from 'matrix-js-sdk';
 import { collectionKeys, collections } from './collections';
 import { connectRoom, createAndConnectRoom, login } from './methods';
+import { updateLoginStatus } from './methods/updateLoginStatus';
 import {
   Collection,
   CollectionKey,
@@ -39,13 +40,6 @@ export const initialRegistry: Collection<RegistryData> = {
     roomAlias: '#eduvault_registry_<username>:matrix.org', // to be replaced on login with real username
     store: initialRegistryStore,
   },
-};
-
-const updateLoginStatus = (_db: Database) => (status: ConnectStatus) => {
-  _db.loginStatus = status;
-  if (status === 'ok') _db.loggedIn = true;
-  else _db.loggedIn = false;
-  if (_db.onLoginStatusUpdate) _db.onLoginStatusUpdate(status);
 };
 
 export class Database {
