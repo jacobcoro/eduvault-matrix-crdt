@@ -49,9 +49,10 @@ const NotesApp = () => {
   useEffect(() => {
     connectRoomsOrCreateDefaultRoom();
   }, [connectRoomsOrCreateDefaultRoom]);
-
+  console.log({ db, client: db?.matrixClient });
   if (db && db.matrixClient) {
     db.onRoomConnectStatusUpdate = (status, collection) => {
+      console.log({ status, collection });
       if (status === 'ok' && collection === 'notes') {
         setReady(true);
       }

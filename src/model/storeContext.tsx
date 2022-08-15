@@ -29,6 +29,7 @@ export const StoreProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
     setLoginStatus: (status: ConnectStatus) => void
   ) => {
     const setLoginStatusAndCheckLoggedIn = (status: ConnectStatus) => {
+      console.log({ status });
       if (status == 'ok') setLoggedIn(true);
       else setLoggedIn(false);
       setLoginStatus(status);

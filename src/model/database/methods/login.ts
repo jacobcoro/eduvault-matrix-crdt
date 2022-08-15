@@ -25,7 +25,11 @@ export const login =
       _db.collections.registry[0].roomAlias = registryRoomAlias;
 
       try {
-        await _db.connectRoom(_db.collections.registry[0], true);
+        const connectRegistryResponse = await _db.connectRoom(
+          _db.collections.registry[0],
+          true
+        );
+        console.log({ connectRegistryResponse });
         _db.updateLoginStatus('ok');
       } catch (error) {
         console.log('connect room failed');

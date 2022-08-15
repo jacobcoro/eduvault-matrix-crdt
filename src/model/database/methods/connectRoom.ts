@@ -12,7 +12,7 @@ export const connectRoom = (_db: Database) =>
     /** Only pass this when creating the registry itself */
     registryConnect?: true
   ) {
-    return new Promise<boolean>(async (resolve, reject) => {
+    return new Promise<boolean>((resolve, reject) => {
       try {
         _db.collections[room.collectionKey][room._id].connectStatus = 'loading';
 
@@ -32,9 +32,19 @@ export const connectRoom = (_db: Database) =>
           matrixClient: _db.matrixClient,
           roomAlias,
         });
-
+        room.matrixProvider.initialize().then((result) => {
+          console.log('initialize result', result);
+        });
+        room.matrixProvider?.onReceivedEvents((events) => {
+          console.log('onReceivedEvents', events);
+        });
+        room.matrixProvider?.onCanWriteChanged((canWrite) => {
+          console.log('canWrite', canWrite);
+          resolve(true);
+        });
         // connect or fail callbacks:
-        room.matrixProvider.onDocumentAvailable(async (e) => {
+        room.matrixProvider?.onDocumentAvailable((e) => {
+          console.log('room.matrixProvider.onDocumentAvailable', { e });
           _db.collections[room.collectionKey][room._id].doc = doc;
           _db.collections[room.collectionKey][room._id].store = store;
 

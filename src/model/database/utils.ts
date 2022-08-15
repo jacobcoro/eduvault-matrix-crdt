@@ -26,12 +26,12 @@ export const truncateRoomAlias = (fullAlias: string) => {
 
 /** @example ('@username:matrix.org')=> '#eduvault_registry_username:matrix.org' */
 export const buildRegistryRoomAlias = (userId: string) => {
-  return buildRoomAlias('eduvault_registry', userId);
+  return buildRoomAlias('eduvault1110_registry', userId);
 };
 
 /** @example ('@username:matrix.org')=> '#eduvault_space_username:matrix.org' */
 export const buildSpaceRoomAlias = (userId: string) => {
-  return buildRoomAlias('eduvault_space', userId);
+  return buildRoomAlias('eduvault7_space', userId);
 };
 
 /** @example ('roomName', '@username:matrix.org')=> '#roomName_username:matrix.org' */
@@ -76,13 +76,15 @@ export const getOrCreateSpace = async (
   } else {
     try {
       console.log('creating space room');
-      await createRoom(
+      const createSpaceRoomRes = await createRoom(
         matrixClient,
         spaceRoomAliasTruncated,
-        'EduVault',
-        'The parent space for all EduVault rooms'
+        'EduVault Space 6',
+        'The parent space for all EduVault rooms',
+        false,
+        true
       );
-
+      console.log({ createSpaceRoomRes });
       return spaceRoomAlias;
     } catch (error: any) {
       if (error.message.includes('M_ROOM_IN_USE')) {
@@ -110,13 +112,13 @@ export const getOrCreateRegistry = async (matrixClient: MatrixClient) => {
   } else {
     try {
       console.log('creating registry room');
-      await createRoom(
+      const createRegistryRes = await createRoom(
         matrixClient,
         registryRoomAliasTruncated,
-        'Database Registry',
+        'Database Registry 6',
         'Where the database stores links to all your other rooms -- DO NOT DELETE'
       );
-
+      console.log({ createRegistryRes });
       return registryRoomAlias;
     } catch (error: any) {
       if (error.message.includes('M_ROOM_IN_USE')) {
@@ -131,7 +133,7 @@ export const getOrCreateRegistry = async (matrixClient: MatrixClient) => {
 };
 
 export async function createMatrixClient(data: LoginData) {
-  console.log({ data });
+  // console.log({ data });
   const { password, accessToken, baseUrl, userId } = data;
   const signInOpts = {
     baseUrl,
@@ -187,15 +189,15 @@ export const newMatrixProvider = ({
   const newMatrixProvider = new MatrixProvider(
     doc,
     matrixClient,
-    { type: 'alias', alias: roomAlias },
-    undefined,
-    {
-      translator: { updatesAsRegularMessages: true },
-      reader: { snapshotInterval: 10 },
-      writer: { flushInterval: 500 },
-    }
+    { type: 'alias', alias: roomAlias }
+    // undefined,
+    // {
+    //   translator: { updatesAsRegularMessages: true },
+    //   reader: { snapshotInterval: 10 },
+    //   writer: { flushInterval: 500 },
+    // }
   );
-  newMatrixProvider.initialize();
+  console.log({ newMatrixProvider });
   return newMatrixProvider;
 };
 
@@ -227,24 +229,11 @@ export const createRoom = async (
   alias?: string,
   name?: string,
   topic?: string,
-  encrypt: boolean = false
+  encrypt: boolean = false,
+  spaceRoom: boolean = false
 ) => {
   let newRoom: { room_id: string } | null = null;
-  const userId = matrixClient.getUserId();
-  const spaceAlias = buildSpaceRoomAlias(userId);
-  const spaceIdRes = await matrixClient.getRoomIdForAlias(spaceAlias);
-  if (!spaceIdRes) throw new Error('space not found');
-  const spaceId = spaceIdRes.room_id;
-  const host = userId.split(':')[1];
-
-  const initialState: sdk.ICreateRoomStateEvent[] = [
-    {
-      state_key: `!${spaceId}:${host}`,
-      type: 'm.space.parent',
-      content: {},
-    },
-  ];
-  console.log({ initialState });
+  const initialState: sdk.ICreateRoomStateEvent[] = [];
   if (encrypt)
     initialState.push({
       type: 'm.room.encryption',
@@ -260,8 +249,35 @@ export const createRoom = async (
     visibility: Visibility.Private, // some bad typings from the sdk. this is expecting an enum. but the enum is not exported from the library.
     // this enables encryption
     initial_state: initialState,
+    creation_content: { type: spaceRoom ? 'm.space' : undefined },
   });
 
   if (!newRoom || !newRoom.room_id) throw new Error('failed to create room');
+
+  if (!spaceRoom) registerRoomToSpace(matrixClient, newRoom.room_id);
+
   return newRoom;
+};
+
+const registerRoomToSpace = async (
+  matrixClient: MatrixClient,
+  roomId: string
+) => {
+  const userId = matrixClient.getUserId();
+  const spaceAlias = buildSpaceRoomAlias(userId);
+  const spaceIdRes = await matrixClient.getRoomIdForAlias(spaceAlias);
+  if (!spaceIdRes) throw new Error('space not found');
+  const spaceId = spaceIdRes.room_id;
+
+  const host = spaceId.split(':')[1];
+
+  const registerToSpaceRes = await matrixClient.sendStateEvent(
+    spaceId,
+    'm.space.child',
+    { via: host },
+    roomId
+  );
+  // console.log({ registerToSpaceRes });
+  // const hierarchy = await matrixClient.getRoomHierarchy(spaceId);
+  // console.log({ hierarchy });
 };
