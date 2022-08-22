@@ -5,13 +5,13 @@ import { buildRef } from '../utils';
 export const exampleDb: { collections: Collections } = {
   collections: {
     registry: {
+      // other rooms are indexed by their room alias. registry is just a single room so it's index is 0.
       ['0']: {
-        _id: '0',
         collectionKey: CollectionKey.registry,
         matrixProvider: null,
-        roomAlias: '#eduvault_registry_<username>:matrix.org',
+        // note that roomAlias is the undecorated alias. if the final will be # `#<alias>_<username>:matrix.org' just <alias>
+        roomAlias: 'eduvault_registry_<username>',
         connectStatus: 'ok',
-
         store: {
           documents: {
             ['0']: {
@@ -20,11 +20,17 @@ export const exampleDb: { collections: Collections } = {
               _created: 0,
               _updated: 0,
               notes: {
-                ['0']: { roomAlias: 'notes-room-alias-1', roomId: '0' },
+                ['notes-room-alias-1']: {
+                  roomAlias: 'notes-room-alias-1',
+                },
               },
               flashcards: {
-                ['0']: { roomAlias: 'flashcard-room-alias-1', roomId: '0' },
-                ['1']: { roomAlias: 'flashcard-room-alias-2', roomId: '0' },
+                ['flashcard-room-alias-1']: {
+                  roomAlias: 'flashcard-room-alias-1',
+                },
+                ['flashcard-room-alias-2']: {
+                  roomAlias: 'flashcard-room-alias-2',
+                },
               },
               registry: {},
             },
@@ -34,12 +40,12 @@ export const exampleDb: { collections: Collections } = {
     },
     notes: {
       // Rooms
-      ['0']: {
-        _id: '0',
+      ['notes-room-alias-1']: {
         collectionKey: CollectionKey.notes,
         matrixProvider: null,
         roomAlias: 'notes-room-alias-1',
         name: 'Typescript Study Notes',
+        created: new Date(),
         connectStatus: 'ok',
         store: {
           documents: {
@@ -62,14 +68,13 @@ export const exampleDb: { collections: Collections } = {
       },
     },
     flashcards: {
-      ['0']: {
-        _id: '0',
+      ['flashcards-room-alias-1']: {
         collectionKey: CollectionKey.flashcards,
         matrixProvider: null,
-        roomAlias: 'notes-room-alias-1',
+        roomAlias: 'flashcards-room-alias-1',
         name: 'Typescript Study Flashcards',
         connectStatus: 'ok',
-
+        created: new Date(),
         store: {
           documents: {
             ['0']: {
@@ -84,14 +89,13 @@ export const exampleDb: { collections: Collections } = {
           },
         },
       },
-      ['1']: {
-        _id: '1',
+      ['flashcards-room-alias-2']: {
         collectionKey: CollectionKey.flashcards,
         matrixProvider: null,
-        roomAlias: 'notes-room-alias-2',
+        roomAlias: 'flashcards-room-alias-2',
         name: 'Chinese Study Flashcards',
         connectStatus: 'ok',
-
+        created: new Date(),
         store: {
           documents: {
             ['0']: {

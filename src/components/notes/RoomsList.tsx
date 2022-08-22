@@ -1,19 +1,22 @@
 import { CaretDown, CaretRight, PlusSquare } from '@styled-icons/fa-solid';
-import { Database, Note, Room } from 'model';
+import { Database, Note, Room, truncateRoomAlias } from 'model';
 import { StoreContext } from 'model/storeContext';
-import { useContext, useEffect, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { NotesAppContext } from './NotesApp';
 import { NotesProvider } from './NotesContext';
 import NotesList from './NotesList';
 import styles from './RoomsList.module.scss';
-const RoomsList = ({
-  db,
-  selectedRoom,
-}: {
-  db: Database;
-  selectedRoom: string;
-}) => {
+const RoomsList = ({ db }: { db: Database }) => {
   const rooms = db.collections.notes;
   const roomKeys = Object.keys(rooms);
+  const { selectedRoom } = useContext(NotesAppContext);
   return (
     <div>
       <div className={styles.headerRow}>
@@ -44,36 +47,63 @@ const RoomsListItem = ({
   room: Room<Note>;
   isSelectedRoom: boolean;
 }) => {
-  const { db } = useContext(StoreContext);
-  const [userId, setUserId] = useState<string>();
-  useEffect(() => {
-    const getMe = async () => {
-      const res = await db?.matrixClient?.whoami();
-      if (res) setUserId(res.user_id.split('@')[1]);
-    };
-    getMe();
-  }, [db, db?.matrixClient]);
+  const { db, userId } = useContext(StoreContext);
+  const { setSelectedRoom } = useContext(NotesAppContext);
+
   const [show, setShow] = useState(isSelectedRoom);
-  let cleanedAlias = userId
-    ? room.roomAlias.split(`_${userId}`)[0].slice(1)
-    : room.roomAlias.slice(1);
+  const [roomName, setRoomName] = useState(room.name);
 
-  const shortenedAlias =
-    cleanedAlias.length > 30 ? cleanedAlias.slice(0, 30) + '...' : cleanedAlias;
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    console.log('RoomsListItem: useEffect', room.name);
+    if (room.name) {
+      setRoomName(room.name);
+    } else {
+      let cleanedAlias = userId
+        ? room.roomAlias.split(`_${userId}`)[0].slice(1)
+        : room.roomAlias.slice(1);
 
-  const roomName = room.name ?? shortenedAlias;
-  return (
-    <NotesProvider notesStore={room.store.documents}>
-      <div className={styles.titleRow}>
-        <button onClick={() => setShow(!show)}>
-          <h3>{roomName}</h3>
-          {show ? <CaretDown size={16} /> : <CaretRight size={16} />}
-        </button>
-      </div>
-      <hr />
-      {show && <NotesList />}
-    </NotesProvider>
-  );
+      const shortenedAlias =
+        cleanedAlias.length > 30
+          ? cleanedAlias.slice(0, 30) + '...'
+          : cleanedAlias;
+
+      setRoomName(shortenedAlias);
+    }
+  }, [room.name, room.roomAlias, userId]);
+
+  useEffect(() => {
+    if (JSON.stringify(room.store.documents) !== '{}') {
+      setReady(true);
+      // console.log('room ready');
+    } else {
+      // console.log('room not connected');
+      db?.connectRoom(room.roomAlias, room.collectionKey);
+    }
+  }, [room.store.documents, db, room]);
+
+  if (!ready) return <div>...loading</div>;
+  else
+    return (
+      <NotesProvider notesStore={room.store.documents}>
+        <div
+          className={styles.titleRow}
+          onClick={() => setSelectedRoom(room.roomAlias)}
+        >
+          <span>
+            <h3 style={{ display: 'inline' }}>{roomName}</h3>
+            <button
+              style={{ display: 'inline' }}
+              onClick={() => setShow(!show)}
+            >
+              {show ? <CaretDown size={16} /> : <CaretRight size={16} />}
+            </button>
+          </span>
+        </div>
+        <hr />
+        {show && <NotesList />}
+      </NotesProvider>
+    );
 };
 
 export default RoomsList;

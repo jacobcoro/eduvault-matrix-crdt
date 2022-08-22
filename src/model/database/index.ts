@@ -35,12 +35,18 @@ export const initialRegistry: Collection<RegistryData> = {
   '0': {
     connectStatus: 'initial',
     collectionKey: CollectionKey.registry,
-    _id: '0',
     matrixProvider: null,
     roomAlias: '#eduvault_registry_<username>:matrix.org', // to be replaced on login with real username
     store: initialRegistryStore,
   },
 };
+
+const getCollectionRegistry =
+  (_db: Database) => (collectionKey: CollectionKey) =>
+    _db.collections.registry['0'].store.documents['0'][collectionKey];
+
+const getRegistryStore = (_db: Database) => () =>
+  _db.collections.registry['0'].store;
 
 export class Database {
   matrixClient: MatrixClient | null = null;
@@ -65,6 +71,9 @@ export class Database {
   connectRoom = connectRoom(this);
   createAndConnectRoom = createAndConnectRoom(this);
   login = login(this);
+
+  getCollectionRegistry = getCollectionRegistry(this);
+  getRegistryStore = getRegistryStore(this);
   constructor() {
     // todo: if registry is in localStorage, load up each room's store.
   }

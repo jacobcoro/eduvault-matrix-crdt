@@ -1,91 +1,138 @@
+import { useSyncedStore } from '@syncedstore/react';
 import Editor from 'components/Editor';
-import { CollectionKey, Database } from 'model';
+import {
+  buildRoomAlias,
+  CollectionKey,
+  Database,
+  getUndecoratedRoomAlias,
+  newEmptyRoom,
+  truncateRoomAlias,
+} from 'model';
 import { StoreContext } from 'model/storeContext';
-
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { syncedStore } from '@syncedstore/core';
+import {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  createContext,
+} from 'react';
 import style from './NotesApp.module.scss';
 import { NotesProvider } from './NotesContext';
 
+const defaultNotesRoomAliasKey = 'notes--default';
 import RoomsList from './RoomsList';
 
-const NotesApp = () => {
-  const { db } = useContext(StoreContext);
-  let store =
-    db && db.collections.notes[0] ? db.collections.notes[0].store : null;
+type INotesAppContext = {
+  selectedRoom: string;
+  setSelectedRoom: Dispatch<SetStateAction<string>>;
+  selectedNoteId: string;
+  setSelectedNoteId: Dispatch<SetStateAction<string>>;
+};
+const initialContext: INotesAppContext = {
+  selectedRoom: '',
+  setSelectedRoom: () => {},
+  selectedNoteId: '',
+  setSelectedNoteId: () => {},
+};
 
-  const [ready, setReady] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState<string>('0');
-  console.log({ store, db });
-  const connectRoomsOrCreateDefaultRoom = useCallback(async () => {
+export const NotesAppContext = createContext(initialContext);
+
+const NotesAppProvider: FC<{ children: any }> = ({ children }) => {
+  const [selectedRoom, setSelectedRoom] = useState<string>('');
+  const [selectedNoteId, setSelectedNoteId] = useState('');
+
+  return (
+    <NotesAppContext.Provider
+      value={{
+        selectedRoom,
+        setSelectedRoom,
+        selectedNoteId,
+        setSelectedNoteId,
+      }}
+    >
+      {children}
+    </NotesAppContext.Provider>
+  );
+};
+
+const NotesAppInternal = ({ db }: { db: Database }) => {
+  const { userId } = useContext(StoreContext);
+  const { selectedRoom, setSelectedRoom } = useContext(NotesAppContext);
+
+  let store = db.collections.notes[selectedRoom] ?? null;
+
+  const room = db.collections.notes[selectedRoom];
+  // const registryStore = db.getRegistryStore();
+
+  // const registry = useSyncedStore(registryStore);
+  const connectOrCreateRoom = useCallback(async () => {
     if (!db) return null;
-
+    const notesRegistry = db.getCollectionRegistry(CollectionKey.notes) ?? {};
+    console.log(Object.keys(notesRegistry));
     // lookup notes rooms in registry
-    const notesRegistry = db.collections.registry[0].store.documents[0].notes;
-    // connect each note room
-    const notesKeysList = Object.keys(notesRegistry);
-
-    if (notesKeysList.length === 0) {
-      console.log('no notes rooms found, creating default room');
-      const index = await db.createAndConnectRoom(
-        CollectionKey.notes,
-        'notes-default',
-        'Default Notes Collection'
+    if (Object.keys(notesRegistry).length === 0) {
+      // console.log('no notes rooms found, creating default room');
+      const defaultNotesRoomAlias = buildRoomAlias(
+        defaultNotesRoomAliasKey,
+        userId
       );
-      if (index) setSelectedRoom(index);
-    } else {
-      const noteRoomData = notesKeysList.map(
-        (key) => db.collections.registry[0].store.documents[0].notes[key]
-      );
-      const promises = noteRoomData.map((room) => {
-        return async () => {
-          await db.connectRoom(db.collections.notes[room.roomId]);
-        };
+      const defaultNotesRoom = await db.createAndConnectRoom({
+        collectionKey: CollectionKey.notes,
+        alias: defaultNotesRoomAliasKey,
+        name: 'Default Notes Collection',
+        // registry,
       });
-      await Promise.all(promises);
-      setSelectedRoom(notesKeysList[0]);
+      if (defaultNotesRoom) setSelectedRoom(defaultNotesRoomAlias);
+    } else {
+      if (!room || room.connectStatus !== 'ok')
+        db.connectRoom(selectedRoom, CollectionKey.notes);
     }
-  }, [db]);
+  }, [db, selectedRoom, room, userId, setSelectedRoom]);
 
   useEffect(() => {
-    connectRoomsOrCreateDefaultRoom();
-  }, [connectRoomsOrCreateDefaultRoom]);
-  console.log({ db, client: db?.matrixClient });
-  if (db && db.matrixClient) {
-    db.onRoomConnectStatusUpdate = (status, collection) => {
-      console.log({ status, collection });
-      if (status === 'ok' && collection === 'notes') {
-        setReady(true);
-      }
-    };
-  }
+    connectOrCreateRoom();
+  }, [connectOrCreateRoom]);
 
-  if (db && store && JSON.stringify(store) !== '{}' && ready)
-    return <NotesAppInternal db={db} selectedRoom={selectedRoom} />;
+  if (store) return <NotesAppDashboard db={db} />;
   return <div>...loading collections</div>;
 };
 
-const NotesAppInternal = ({
-  selectedRoom,
-  db,
-}: {
-  selectedRoom: string;
-  db: Database;
-}) => {
+const NotesAppDashboard = ({ db }: { db: Database }) => {
+  const { selectedRoom, selectedNoteId } = useContext(NotesAppContext);
+
   return (
     <div className={style.root}>
       <section className={style.notesListSection}>
-        {/* RoomsList has entire db */}
-        <RoomsList db={db} selectedRoom={selectedRoom} />
+        <RoomsList db={db} />
       </section>
       <section className={style.editorSection}>
         {/* editor just has notes provider of selected room */}
         <NotesProvider
           notesStore={db.collections.notes[selectedRoom].store.documents}
         >
-          <Editor />
+          <Editor selectedNoteId={selectedNoteId} />
         </NotesProvider>
       </section>
     </div>
   );
 };
+
+const NotesApp = () => {
+  const { db } = useContext(StoreContext);
+
+  return (
+    <NotesAppProvider>
+      {db ? (
+        <NotesAppInternal db={db}></NotesAppInternal>
+      ) : (
+        <div>...loading database</div>
+      )}
+    </NotesAppProvider>
+  );
+};
+
 export default NotesApp;

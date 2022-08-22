@@ -19,17 +19,19 @@ export const login =
     try {
       _db.updateLoginStatus('loading');
       _db.matrixClient = await createMatrixClient(loginData);
-      const registryRoomAlias = await getOrCreateRegistry(_db.matrixClient);
+      const registryRoomAlias = await getOrCreateRegistry(
+        _db.matrixClient,
+        _db
+      );
       if (!registryRoomAlias)
         throw new Error('could not get registry room alias');
-      _db.collections.registry[0].roomAlias = registryRoomAlias;
 
       try {
         const connectRegistryResponse = await _db.connectRoom(
-          _db.collections.registry[0],
-          true
+          registryRoomAlias,
+          CollectionKey.registry
         );
-        console.log({ connectRegistryResponse });
+        // console.log({ connectRegistryResponse });
         _db.updateLoginStatus('ok');
       } catch (error) {
         console.log('connect room failed');
@@ -40,7 +42,6 @@ export const login =
       if (callback) callback();
     } catch (error) {
       console.log('login failed');
-
       console.error(error);
       _db.updateLoginStatus('failed');
     }
