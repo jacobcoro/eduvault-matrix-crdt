@@ -3,11 +3,12 @@ import { CollectionKey, Documents, RegistryData } from '../types';
 import { syncedStore, getYjsValue } from '@syncedstore/core';
 import * as Y from 'yjs';
 import { newEmptyRoom, newMatrixProvider } from '../utils';
-import { Database } from '..';
+import { Database, initialRegistryStore } from '..';
 
 /** make sure to query the current collection to make sure the passed room's id and alias are correct.  */
 export const connectRoom = (_db: Database) =>
   function <T>(
+    /** full alias including host name :matrix.org */
     roomAlias: string,
     collectionKey: CollectionKey,
     registryStore?: {
@@ -58,6 +59,15 @@ export const connectRoom = (_db: Database) =>
         room.matrixProvider?.onDocumentAvailable((e) => {
           room.doc = doc;
           room.store = store;
+
+          // populate registry if it is empty
+          if (
+            !registryConnect &&
+            registryStore &&
+            !registryStore?.documents[0]
+          ) {
+            registryStore.documents[0] = initialRegistryStore.documents[0];
+          }
 
           if (
             !registryConnect &&

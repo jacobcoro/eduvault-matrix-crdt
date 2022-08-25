@@ -69,8 +69,7 @@ const NotesAppInternal = ({ db }: { db: Database }) => {
       userId
     );
     if (!selectedRoom) return setSelectedRoom(defaultNotesRoomAlias);
-
-    const notesRegistry = db.getCollectionRegistry(CollectionKey.notes) ?? {};
+    const notesRegistry = registryStore?.documents[0]?.notes ?? {};
     const registryKeys = Object.keys(notesRegistry);
     // lookup notes rooms in registry
     if (registryKeys.length === 0) {
