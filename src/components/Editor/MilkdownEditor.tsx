@@ -43,7 +43,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorRef, Props>(
       },
     }));
 
-    const editor = useEditor(
+    const editor: any = useEditor(
       (root) => createEditor(root, md, readOnly, setEditorReady, onChange),
       [readOnly, md, onChange]
     );
