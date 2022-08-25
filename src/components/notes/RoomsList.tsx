@@ -92,7 +92,6 @@ const RoomsListItem = ({
 
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    console.log('RoomsListItem: useEffect', room.name);
     if (room.name) {
       setRoomName(room.name);
     } else {

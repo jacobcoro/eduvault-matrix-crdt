@@ -123,19 +123,19 @@ export const getOrCreateRegistry = async (
       // console.log('creating registry room');
       const createRegistryRes = await createRoom(
         matrixClient,
-        registryRoomAliasTruncated,
+        registryRoomAlias,
         'Database Registry',
         'Where the database stores links to all your other rooms -- DO NOT DELETE'
       );
       // console.log({ createRegistryRes });
-      _db.collections.registry[0].roomAlias = registryRoomAliasTruncated;
-      return registryRoomAliasTruncated;
+      _db.collections.registry[0].roomAlias = registryRoomAlias;
+      return registryRoomAlias;
     } catch (error: any) {
       if (error.message.includes('M_ROOM_IN_USE')) {
         // console.log('room already exists');
         await matrixClient.joinRoom(registryRoomAliasTruncated);
-        _db.collections.registry[0].roomAlias = registryRoomAliasTruncated;
-        return registryRoomAliasTruncated;
+        _db.collections.registry[0].roomAlias = registryRoomAlias;
+        return registryRoomAlias;
       }
       // still a problem that it wasn't caught before this
 

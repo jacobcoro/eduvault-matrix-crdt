@@ -15,15 +15,16 @@ export const createAndConnectRoom =
     alias,
     name,
     topic,
+    registryStore,
   }: {
     collectionKey: CollectionKey;
     /** undecorated alias */
     alias: string;
     name?: string;
     topic?: string;
-    // registry?: {
-    //   documents: Documents<RegistryData>;
-    // };
+    registryStore?: {
+      documents: Documents<RegistryData>;
+    };
   }) => {
     try {
       if (!_db.matrixClient)
@@ -45,7 +46,7 @@ export const createAndConnectRoom =
         } else throw error;
       }
 
-      await _db.connectRoom(newRoomAlias, collectionKey);
+      await _db.connectRoom(newRoomAlias, collectionKey, registryStore);
       return alias;
     } catch (error) {
       console.error(error);

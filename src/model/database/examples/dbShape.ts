@@ -51,14 +51,15 @@ export const exampleDb: { collections: Collections } = {
           documents: {
             ['0']: {
               text: 'A fact about Typescript',
-              _ref: 'notes.0.0',
+              // if we follow this dot notation we need to make sure that room aliases don't have dots in them.
+              _ref: 'notes.notes-room-alias-1.0',
               _id: '0',
               _created: 1653135317729,
               _updated: 1653135317729,
             },
             ['1']: {
               text: 'Second fact about Typescript',
-              _ref: 'notes.0.1',
+              _ref: 'notes.notes-room-alias-1.1',
               _id: '0',
               _created: 1653135317729,
               _updated: 1653135317729,

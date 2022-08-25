@@ -1,13 +1,12 @@
 import { useSyncedStore } from '@syncedstore/react';
-import { OnEditorChange } from 'components/Editor';
 import { Documents, Note } from 'model';
 
-import { createContext, FC, useCallback, useState } from 'react';
+import { createContext, FC } from 'react';
 
 export const initialMarkdown = `### Write a note`;
 export const formatNewNote = (text: string, id: string) => {
   const newNote: Note = {
-    _ref: id, // todo: use create ref
+    _ref: id, // todo: use create ref. ref should be something like 'notes.notes-room-alias-1.1'
     text,
     _id: id,
     _created: new Date().getTime(),
@@ -18,11 +17,9 @@ export const formatNewNote = (text: string, id: string) => {
 
 type INotesContext = {
   notes: Documents<Note> | null;
-
   handleDelete: (note: Note) => void;
-
-  mostRecentNote: string;
   createNote: (noteText: string, noteId: string) => void;
+  mostRecentNote: string;
 };
 const initialContext: INotesContext = {
   notes: null,

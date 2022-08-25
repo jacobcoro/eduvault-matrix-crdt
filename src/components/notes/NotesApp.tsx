@@ -1,15 +1,7 @@
 import { useSyncedStore } from '@syncedstore/react';
 import Editor from 'components/Editor';
-import {
-  buildRoomAlias,
-  CollectionKey,
-  Database,
-  getUndecoratedRoomAlias,
-  newEmptyRoom,
-  truncateRoomAlias,
-} from 'model';
+import { buildRoomAlias, CollectionKey, Database, Note, Room } from 'model';
 import { StoreContext } from 'model/storeContext';
-import { syncedStore } from '@syncedstore/core';
 import {
   Dispatch,
   FC,
@@ -63,41 +55,48 @@ const NotesAppInternal = ({ db }: { db: Database }) => {
   const { userId } = useContext(StoreContext);
   const { selectedRoom, setSelectedRoom } = useContext(NotesAppContext);
 
-  let store = db.collections.notes[selectedRoom] ?? null;
+  const room: Room<Note> | null = db.collections.notes[selectedRoom] ?? null;
+  const store = room?.store ?? null;
+  const registry = db.getRegistryStore();
+  const [ready, setReady] = useState(!!store?.documents);
 
-  const room = db.collections.notes[selectedRoom];
-  // const registryStore = db.getRegistryStore();
+  const registryStore = useSyncedStore(registry);
 
-  // const registry = useSyncedStore(registryStore);
   const connectOrCreateRoom = useCallback(async () => {
-    if (!db) return null;
+    const defaultNotesRoomAlias = buildRoomAlias(
+      defaultNotesRoomAliasKey,
+      userId
+    );
+    if (!selectedRoom) return setSelectedRoom(defaultNotesRoomAlias);
+
     const notesRegistry = db.getCollectionRegistry(CollectionKey.notes) ?? {};
-    console.log(Object.keys(notesRegistry));
     // lookup notes rooms in registry
     if (Object.keys(notesRegistry).length === 0) {
-      // console.log('no notes rooms found, creating default room');
-      const defaultNotesRoomAlias = buildRoomAlias(
-        defaultNotesRoomAliasKey,
-        userId
-      );
+      console.log('no notes rooms found, creating default room');
+
       const defaultNotesRoom = await db.createAndConnectRoom({
         collectionKey: CollectionKey.notes,
         alias: defaultNotesRoomAliasKey,
         name: 'Default Notes Collection',
-        // registry,
+        registryStore,
       });
-      if (defaultNotesRoom) setSelectedRoom(defaultNotesRoomAlias);
+      if (defaultNotesRoom) setReady(true);
+      // todo: handle error
     } else {
-      if (!room || room.connectStatus !== 'ok')
-        db.connectRoom(selectedRoom, CollectionKey.notes);
+      const res = await db.connectRoom(
+        selectedRoom,
+        CollectionKey.notes,
+        registryStore
+      );
+      if (res) setReady(true);
+      // todo: handle error
     }
-  }, [db, selectedRoom, room, userId, setSelectedRoom]);
+  }, [db, selectedRoom, userId, setSelectedRoom, registryStore]);
 
   useEffect(() => {
-    connectOrCreateRoom();
-  }, [connectOrCreateRoom]);
-
-  if (store) return <NotesAppDashboard db={db} />;
+    if (!ready) connectOrCreateRoom();
+  }, [connectOrCreateRoom, ready]);
+  if (ready) return <NotesAppDashboard db={db} />;
   return <div>...loading collections</div>;
 };
 
@@ -123,14 +122,12 @@ const NotesAppDashboard = ({ db }: { db: Database }) => {
 
 const NotesApp = () => {
   const { db } = useContext(StoreContext);
+  if (!db || !db.collections.registry[0]?.store)
+    return <div>...loading database</div>;
 
   return (
     <NotesAppProvider>
-      {db ? (
-        <NotesAppInternal db={db}></NotesAppInternal>
-      ) : (
-        <div>...loading database</div>
-      )}
+      <NotesAppInternal db={db}></NotesAppInternal>
     </NotesAppProvider>
   );
 };
