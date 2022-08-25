@@ -3,3 +3,7 @@ Remake the whole Database library into 2 parts, one for react hooks and one othe
 make sure the registry is being created properly, saved in the right place, and accessed properly.
 
 get the build working again. maybe go back to my fork of matrix-crdt.
+
+might also be something about server side rendering.
+
+selecting notes in other collections is not setting them to the editor
