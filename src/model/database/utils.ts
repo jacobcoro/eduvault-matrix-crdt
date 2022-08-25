@@ -32,12 +32,12 @@ export const getUndecoratedRoomAlias = (fullAlias: string, userId: string) => {
 
 /** @example ('@username:matrix.org')=> '#eduvault_registry_username:matrix.org' */
 export const buildRegistryRoomAlias = (userId: string) => {
-  return buildRoomAlias('eduvault__registry_', userId);
+  return buildRoomAlias('eduvault_registry__', userId);
 };
 
 /** @example ('@username:matrix.org')=> '#eduvault_space_username:matrix.org' */
 export const buildSpaceRoomAlias = (userId: string) => {
-  return buildRoomAlias('eduvault__space_', userId);
+  return buildRoomAlias('eduvault_space__', userId);
 };
 
 /** @example ('roomName', '@username:matrix.org')=> '#roomName_username:matrix.org' */
