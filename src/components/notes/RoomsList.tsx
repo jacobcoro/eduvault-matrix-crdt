@@ -9,19 +9,56 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { Dialog } from './Dialog';
 import { NotesAppContext } from './NotesApp';
 import { NotesProvider } from './NotesContext';
 import NotesList from './NotesList';
 import styles from './RoomsList.module.scss';
+
 const RoomsList = ({ db }: { db: Database }) => {
   const rooms = db.collections.notes;
   const roomKeys = Object.keys(rooms);
   const { selectedRoom } = useContext(NotesAppContext);
+  const [modalOpen, setOpen] = useState(false);
+  const setModalOpen = (open: boolean) => {
+    setOpen(open);
+    setNewCollectionName('');
+  };
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const newRoom = (name: string) => {
+    // TODO:
+    // open a dialog to input the collection name
+  };
   return (
     <div>
+      <Dialog open={modalOpen} setOpen={setModalOpen}>
+        <>
+          <h1>New Collection</h1>
+          <div className={styles.inputRow}>
+            <label htmlFor="collection-name-input">name</label>
+            <input
+              placeholder="collection name"
+              id="collection-name-input"
+              value={newCollectionName}
+              onChange={(e) => setNewCollectionName(e.target.value)}
+            />
+            <button
+              className={styles.newCollectionButton}
+              disabled={!newCollectionName}
+              onClick={() => {
+                setModalOpen(false);
+                newRoom(newCollectionName);
+              }}
+            >
+              <PlusSquare size={24} />
+            </button>
+          </div>
+        </>
+      </Dialog>
+
       <div className={styles.headerRow}>
         <h3>Collections</h3>
-        <button>
+        <button onClick={() => setModalOpen(true)}>
           <h5>new </h5>
           <PlusSquare size={18} />
         </button>

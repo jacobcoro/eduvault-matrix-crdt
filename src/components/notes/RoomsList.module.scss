@@ -23,6 +23,13 @@
   color: var(--text);
 }
 
+.newCollectionButton {
+  @include mixins.icon-button;
+}
+.inputRow {
+  @include mixins.flex-row;
+}
+
 .titleRow {
   button {
     padding: 0;
