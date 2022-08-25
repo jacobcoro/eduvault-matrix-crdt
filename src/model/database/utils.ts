@@ -32,12 +32,12 @@ export const getUndecoratedRoomAlias = (fullAlias: string, userId: string) => {
 
 /** @example ('@username:matrix.org')=> '#eduvault_registry_username:matrix.org' */
 export const buildRegistryRoomAlias = (userId: string) => {
-  return buildRoomAlias('eduvault_registry__', userId);
+  return buildRoomAlias('eduvault_registry_', userId);
 };
 
 /** @example ('@username:matrix.org')=> '#eduvault_space_username:matrix.org' */
 export const buildSpaceRoomAlias = (userId: string) => {
-  return buildRoomAlias('eduvault_space__', userId);
+  return buildRoomAlias('eduvault_space_', userId);
 };
 
 /** @example ('roomName', '@username:matrix.org')=> '#roomName_username:matrix.org' */
@@ -120,10 +120,10 @@ export const getOrCreateRegistry = async (
     return registryRoomAlias;
   } else {
     try {
-      // console.log('creating registry room');
+      console.log('creating registry room');
       const createRegistryRes = await createRoom(
         matrixClient,
-        registryRoomAlias,
+        registryRoomAliasTruncated,
         'Database Registry',
         'Where the database stores links to all your other rooms -- DO NOT DELETE'
       );
@@ -132,7 +132,7 @@ export const getOrCreateRegistry = async (
       return registryRoomAlias;
     } catch (error: any) {
       if (error.message.includes('M_ROOM_IN_USE')) {
-        // console.log('room already exists');
+        console.log('registry already exists');
         await matrixClient.joinRoom(registryRoomAliasTruncated);
         _db.collections.registry[0].roomAlias = registryRoomAlias;
         return registryRoomAlias;
