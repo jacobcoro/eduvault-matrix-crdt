@@ -1,14 +1,8 @@
 import { CaretDown, CaretRight, PlusSquare } from '@styled-icons/fa-solid';
-import { Database, Note, Room, truncateRoomAlias } from 'model';
+import { useSyncedStore } from '@syncedstore/react';
+import { CollectionKey, Database } from 'model';
 import { StoreContext } from 'model/storeContext';
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { Dialog } from './Dialog';
 import { NotesAppContext } from './NotesApp';
 import { NotesProvider } from './NotesContext';
@@ -16,8 +10,11 @@ import NotesList from './NotesList';
 import styles from './RoomsList.module.scss';
 
 const RoomsList = ({ db }: { db: Database }) => {
-  const rooms = db.collections.notes;
-  const roomKeys = Object.keys(rooms);
+  const registry = db.getRegistryStore();
+  const registryStore = useSyncedStore(registry);
+  const roomKeys = Object.keys(registryStore.documents[0].notes);
+  registry.documents[0].notes;
+
   const { selectedRoom } = useContext(NotesAppContext);
   const [modalOpen, setOpen] = useState(false);
   const setModalOpen = (open: boolean) => {
@@ -25,9 +22,28 @@ const RoomsList = ({ db }: { db: Database }) => {
     setNewCollectionName('');
   };
   const [newCollectionName, setNewCollectionName] = useState('');
-  const newRoom = (name: string) => {
-    // TODO:
-    // open a dialog to input the collection name
+  const [newRoomResult, setNewRoomResult] = useState('');
+  const newRoom = async (name: string) => {
+    const sanitizedAlias = name
+      .trim()
+      .toLocaleLowerCase()
+      .split('.')
+      .join('')
+      .split(' ')
+      .join('-');
+
+    try {
+      const result = await db.createAndConnectRoom({
+        collectionKey: CollectionKey.notes,
+        alias: sanitizedAlias,
+        name,
+        registryStore,
+      });
+      if (!result) throw new Error('Failed to create room');
+      setNewRoomResult('Room created ' + result);
+    } catch (error: any) {
+      setNewRoomResult(error.message);
+    }
   };
   return (
     <div>
@@ -46,12 +62,12 @@ const RoomsList = ({ db }: { db: Database }) => {
               className={styles.newCollectionButton}
               disabled={!newCollectionName}
               onClick={() => {
-                setModalOpen(false);
                 newRoom(newCollectionName);
               }}
             >
               <PlusSquare size={24} />
             </button>
+            <h3>{newRoomResult}</h3>
           </div>
         </>
       </Dialog>
@@ -68,7 +84,7 @@ const RoomsList = ({ db }: { db: Database }) => {
         {roomKeys.map((roomKey) => (
           <RoomsListItem
             key={roomKey}
-            room={rooms[roomKey]}
+            roomAlias={roomKey}
             isSelectedRoom={selectedRoom === roomKey}
           />
         ))}
@@ -78,26 +94,43 @@ const RoomsList = ({ db }: { db: Database }) => {
 };
 
 const RoomsListItem = ({
-  room,
+  roomAlias,
   isSelectedRoom,
 }: {
-  room: Room<Note>;
+  roomAlias: string;
   isSelectedRoom: boolean;
 }) => {
   const { db, userId } = useContext(StoreContext);
   const { setSelectedRoom } = useContext(NotesAppContext);
+  const room = db?.collections.notes[roomAlias];
 
-  const [show, setShow] = useState(isSelectedRoom);
-  const [roomName, setRoomName] = useState(room.name);
+  const registry = db?.getRegistryStore();
+  const registryStore = useSyncedStore(registry);
 
   const [ready, setReady] = useState(false);
+
+  const connectOrCreateRoom = useCallback(async () => {
+    const res = await db?.connectRoom(
+      roomAlias,
+      CollectionKey.notes,
+      registryStore
+    );
+    if (res) setReady(true);
+    // todo: handle error
+  }, [db, roomAlias, registryStore]);
   useEffect(() => {
-    if (room.name) {
-      setRoomName(room.name);
+    if (!ready) connectOrCreateRoom();
+  }, [connectOrCreateRoom, ready]);
+
+  const [roomName, setRoomName] = useState(room?.name ?? '');
+  useEffect(() => {
+    if (room?.name) {
+      setRoomName(room?.name);
     } else {
-      let cleanedAlias = userId
-        ? room.roomAlias.split(`_${userId}`)[0].slice(1)
-        : room.roomAlias.slice(1);
+      let cleanedAlias =
+        (userId
+          ? room?.roomAlias.split(`_${userId}`)[0].slice(1)
+          : room?.roomAlias.slice(1)) ?? '';
 
       const shortenedAlias =
         cleanedAlias.length > 30
@@ -106,19 +139,27 @@ const RoomsListItem = ({
 
       setRoomName(shortenedAlias);
     }
-  }, [room.name, room.roomAlias, userId]);
+  }, [room?.name, room?.roomAlias, userId]);
 
-  useEffect(() => {
-    if (JSON.stringify(room.store.documents) !== '{}') {
-      setReady(true);
-      // console.log('room ready');
-    } else {
-      // console.log('room not connected');
-      db?.connectRoom(room.roomAlias, room.collectionKey);
-    }
-  }, [room.store.documents, db, room]);
+  const [show, setShow] = useState(isSelectedRoom);
 
-  if (!ready) return <div>...loading</div>;
+  if (!room || room.connectStatus !== 'ok')
+    return (
+      <>
+        <div className={styles.titleRow}>
+          <span>
+            <h3 style={{ display: 'inline' }}>loading...</h3>
+            <button
+              style={{ display: 'inline' }}
+              onClick={() => setShow(!show)}
+            >
+              {show ? <CaretDown size={16} /> : <CaretRight size={16} />}
+            </button>
+          </span>
+        </div>
+        <hr />
+      </>
+    );
   else
     return (
       <NotesProvider notesStore={room.store.documents}>

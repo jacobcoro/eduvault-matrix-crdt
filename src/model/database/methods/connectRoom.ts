@@ -66,7 +66,7 @@ export const connectRoom = (_db: Database) =>
           ) {
             // register room in registry
             // could consider moving this to createRoom, problem is createRoom doesn't have access to the registryStore
-            // console.log('registering room in registry', roomAlias);
+            console.log('registering room in registry', roomAlias);
             registryStore.documents[0][room.collectionKey][roomAlias] = {
               roomAlias,
             };

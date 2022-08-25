@@ -57,9 +57,10 @@ const NotesAppInternal = ({ db }: { db: Database }) => {
 
   const room: Room<Note> | null = db.collections.notes[selectedRoom] ?? null;
   const store = room?.store ?? null;
-  const registry = db.getRegistryStore();
+
   const [ready, setReady] = useState(!!store?.documents);
 
+  const registry = db.getRegistryStore();
   const registryStore = useSyncedStore(registry);
 
   const connectOrCreateRoom = useCallback(async () => {
@@ -70,8 +71,9 @@ const NotesAppInternal = ({ db }: { db: Database }) => {
     if (!selectedRoom) return setSelectedRoom(defaultNotesRoomAlias);
 
     const notesRegistry = db.getCollectionRegistry(CollectionKey.notes) ?? {};
+    const registryKeys = Object.keys(notesRegistry);
     // lookup notes rooms in registry
-    if (Object.keys(notesRegistry).length === 0) {
+    if (registryKeys.length === 0) {
       console.log('no notes rooms found, creating default room');
 
       const defaultNotesRoom = await db.createAndConnectRoom({
