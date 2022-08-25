@@ -1,4 +1,4 @@
-import { MatrixProvider } from '@jacobcoro/matrix-crdt';
+import { MatrixProvider } from 'matrix-crdt';
 import * as Y from 'yjs';
 import { CollectionKey } from './collections';
 export type { Collections } from './collections';
@@ -31,11 +31,11 @@ export type ConnectStatus = 'initial' | 'loading' | 'failed' | 'ok';
 /** corresponds to a 'room' in Matrix */
 export interface Room<T> {
   connectStatus: ConnectStatus;
-  _id: string;
   collectionKey: CollectionKey;
   matrixProvider: MatrixProvider | null;
   roomAlias: string;
   name?: string;
+  created?: Date;
   // roomId: string;
   doc?: Y.Doc;
   store: { documents: Documents<T> }; // the synced store.
@@ -43,18 +43,15 @@ export interface Room<T> {
 
 export type Collection<T> = {
   // todo: methods to create and delete rooms
-  // createRoom: (roomAlias: string, roomId: string) => Room<T>;
-  /** Room ID can be string number starting at zero, based on order of creation */
-  [roomId: string]: Room<T>;
+  [roomAlias: string]: Room<T>;
 };
 
 export interface RoomMetaData {
   roomAlias: string;
-  roomId: string;
 }
 
 export type RegistryData = {
-  [key in CollectionKey]: { [roomId: string]: RoomMetaData };
+  [key in CollectionKey]: { [roomAlias: string]: RoomMetaData };
 };
 
 export type OnRoomConnectStatusUpdate = (

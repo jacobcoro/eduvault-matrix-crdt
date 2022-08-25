@@ -1,7 +1,8 @@
 import sdk, { ICreateClientOpts, MatrixClient } from 'matrix-js-sdk';
-import { MatrixProvider } from '@jacobcoro/matrix-crdt';
+import { MatrixProvider } from 'matrix-crdt';
 import * as Y from 'yjs';
 import { CollectionKey, Room } from './types';
+import { Database } from '.';
 
 export interface LoginData extends ICreateClientOpts {
   password?: string;
@@ -21,19 +22,29 @@ export enum Visibility {
 }
 /** @example ('#roomName_username:matrix.org')=> 'roomName_username' */
 export const truncateRoomAlias = (fullAlias: string) => {
-  return `${fullAlias.split('#')[1].split(':')[0]}`;
+  return fullAlias.split('#')[1].split(':')[0];
+};
+
+/** @example ('#roomName_username:matrix.org')=> 'roomName' */
+export const getUndecoratedRoomAlias = (fullAlias: string, userId: string) => {
+  return fullAlias.split(userId)[0];
 };
 
 /** @example ('@username:matrix.org')=> '#eduvault_registry_username:matrix.org' */
 export const buildRegistryRoomAlias = (userId: string) => {
-  return buildRoomAlias('eduvault_registry', userId);
+  return buildRoomAlias('eduvault_registry__', userId);
+};
+
+/** @example ('@username:matrix.org')=> '#eduvault_space_username:matrix.org' */
+export const buildSpaceRoomAlias = (userId: string) => {
+  return buildRoomAlias('eduvault_space__', userId);
 };
 
 /** @example ('roomName', '@username:matrix.org')=> '#roomName_username:matrix.org' */
 export const buildRoomAlias = (alias: string, userId: string) => {
-  console.log({ alias, userId });
-  const res = `#${alias}_${userId.split('@')[1]}`;
-  console.log({ res });
+  // console.log({ alias, userId });
+  const res = `#${alias}_${userId}`;
+  // console.log({ res });
   return res;
 };
 
@@ -43,21 +54,61 @@ export const checkForExistingRoomAlias = async (
 ) => {
   let existingRoom: { room_id: string } | null = null;
   try {
-    console.time('getRoomIdForAlias');
+    // console.time('getRoomIdForAlias');
     existingRoom = await matrixClient.getRoomIdForAlias(alias);
   } catch (error) {
-    console.log('room not found from alias');
+    // console.log('room not found from alias');
   }
-  console.timeEnd('getRoomIdForAlias');
-  console.log({ existingRoom });
+  // console.timeEnd('getRoomIdForAlias');
+  // console.log({ existingRoom });
   if (existingRoom?.room_id) {
     return true;
   } else return false;
 };
 
-export const getOrCreateRegistry = async (matrixClient: MatrixClient) => {
-  const userId = matrixClient.getUserId();
+export const getOrCreateSpace = async (
+  matrixClient: MatrixClient,
+  userId: string
+) => {
+  const spaceRoomAlias = buildSpaceRoomAlias(userId);
+  const spaceRoomAliasTruncated = truncateRoomAlias(spaceRoomAlias);
+  const spaceExists = await checkForExistingRoomAlias(
+    matrixClient,
+    spaceRoomAlias
+  );
 
+  if (spaceExists) {
+    return spaceRoomAlias;
+  } else {
+    try {
+      // console.log('creating space room');
+      const createSpaceRoomRes = await createRoom(
+        matrixClient,
+        spaceRoomAliasTruncated,
+        'EduVault Space',
+        'The parent space for all EduVault rooms',
+        false,
+        true
+      );
+      // console.log({ createSpaceRoomRes });
+      return spaceRoomAlias;
+    } catch (error: any) {
+      if (error.message.includes('M_ROOM_IN_USE')) {
+        // console.log('room already exists');
+        await matrixClient.joinRoom(spaceRoomAliasTruncated);
+      }
+      throw new Error(error);
+    }
+  }
+};
+
+export const getOrCreateRegistry = async (
+  matrixClient: MatrixClient,
+  _db: Database
+) => {
+  const userId = matrixClient.getUserId();
+  const space = await getOrCreateSpace(matrixClient, userId);
+  // console.log({ space });
   const registryRoomAlias = buildRegistryRoomAlias(userId);
   const registryRoomAliasTruncated = truncateRoomAlias(registryRoomAlias);
   const registryExists = await checkForExistingRoomAlias(
@@ -69,26 +120,32 @@ export const getOrCreateRegistry = async (matrixClient: MatrixClient) => {
     return registryRoomAlias;
   } else {
     try {
-      console.log('creating room');
-      await createRoom(
+      // console.log('creating registry room');
+      const createRegistryRes = await createRoom(
         matrixClient,
-        registryRoomAliasTruncated,
+        registryRoomAlias,
         'Database Registry',
-        'Where the database stores links to all your other rooms'
+        'Where the database stores links to all your other rooms -- DO NOT DELETE'
       );
-
+      // console.log({ createRegistryRes });
+      _db.collections.registry[0].roomAlias = registryRoomAlias;
       return registryRoomAlias;
     } catch (error: any) {
-      if (error.message.includes('M_ROOM_IN_USE'))
-        console.log('room already exists');
+      if (error.message.includes('M_ROOM_IN_USE')) {
+        // console.log('room already exists');
+        await matrixClient.joinRoom(registryRoomAliasTruncated);
+        _db.collections.registry[0].roomAlias = registryRoomAlias;
+        return registryRoomAlias;
+      }
       // still a problem that it wasn't caught before this
+
       throw new Error(error);
     }
   }
 };
 
 export async function createMatrixClient(data: LoginData) {
-  console.log({ data });
+  // console.log({ data });
   const { password, accessToken, baseUrl, userId } = data;
   const signInOpts = {
     baseUrl,
@@ -111,7 +168,7 @@ export async function createMatrixClient(data: LoginData) {
         password,
       }
     );
-    console.log({ loginRes });
+    // console.log({ loginRes });
     const loginSaveData: LoginData = {
       baseUrl,
       userId,
@@ -152,7 +209,7 @@ export const newMatrixProvider = ({
       writer: { flushInterval: 500 },
     }
   );
-  newMatrixProvider.initialize();
+  // console.log({ newMatrixProvider });
   return newMatrixProvider;
 };
 
@@ -164,15 +221,14 @@ export const buildRef = (
 
 export const newEmptyRoom = <T>(
   collectionKey: CollectionKey,
-  _id?: string,
-  roomAlias?: string
+  roomAlias: string
 ) => {
   const room: Room<T> = {
     connectStatus: 'initial',
     collectionKey,
-    _id: _id ?? '',
     matrixProvider: null,
-    roomAlias: roomAlias ?? '',
+    created: new Date(),
+    roomAlias,
     store: { documents: {} },
   };
   return room;
@@ -184,29 +240,55 @@ export const createRoom = async (
   alias?: string,
   name?: string,
   topic?: string,
-  encrypt: boolean = true
+  encrypt: boolean = false,
+  spaceRoom: boolean = false
 ) => {
   let newRoom: { room_id: string } | null = null;
-
+  const initialState: sdk.ICreateRoomStateEvent[] = [];
+  if (encrypt)
+    initialState.push({
+      type: 'm.room.encryption',
+      state_key: '',
+      content: {
+        algorithm: 'm.megolm.v1.aes-sha2',
+      },
+    });
   newRoom = await matrixClient.createRoom({
     room_alias_name: alias,
     name,
     topic,
     visibility: Visibility.Private, // some bad typings from the sdk. this is expecting an enum. but the enum is not exported from the library.
     // this enables encryption
-    initial_state: encrypt
-      ? [
-          {
-            type: 'm.room.encryption',
-            state_key: '',
-            content: {
-              algorithm: 'm.megolm.v1.aes-sha2',
-            },
-          },
-        ]
-      : undefined,
+    initial_state: initialState,
+    creation_content: { type: spaceRoom ? 'm.space' : undefined },
   });
 
   if (!newRoom || !newRoom.room_id) throw new Error('failed to create room');
+
+  if (!spaceRoom) registerRoomToSpace(matrixClient, newRoom.room_id);
+
   return newRoom;
+};
+
+const registerRoomToSpace = async (
+  matrixClient: MatrixClient,
+  roomId: string
+) => {
+  const userId = matrixClient.getUserId();
+  const spaceAlias = buildSpaceRoomAlias(userId);
+  const spaceIdRes = await matrixClient.getRoomIdForAlias(spaceAlias);
+  if (!spaceIdRes) throw new Error('space not found');
+  const spaceId = spaceIdRes.room_id;
+
+  const host = spaceId.split(':')[1];
+
+  const registerToSpaceRes = await matrixClient.sendStateEvent(
+    spaceId,
+    'm.space.child',
+    { via: host },
+    roomId
+  );
+  // console.log({ registerToSpaceRes });
+  // const hierarchy = await matrixClient.getRoomHierarchy(spaceId);
+  // console.log({ hierarchy });
 };

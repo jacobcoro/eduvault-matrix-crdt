@@ -2,12 +2,13 @@ import { Edit, Trash } from '@styled-icons/fa-solid';
 import Editor from 'components/Editor';
 
 import { useContext } from 'react';
+import { NotesAppContext } from './NotesApp';
 import style from './NotesApp.module.scss';
 import { initialMarkdown, NotesContext } from './NotesContext';
 
 const NotesList = () => {
-  const { createNote, notes, handleSelectNote, handleDelete } =
-    useContext(NotesContext);
+  const { createNote, notes, handleDelete } = useContext(NotesContext);
+  const { setSelectedNoteId } = useContext(NotesAppContext);
 
   const notesLength = notes ? Object.values(notes).length : 0;
   if (!notes) return <div></div>;
@@ -27,7 +28,7 @@ const NotesList = () => {
             <div
               className={style.note}
               key={note._id}
-              onClick={() => handleSelectNote(_id)}
+              onClick={() => setSelectedNoteId(_id)}
             >
               <div className={style.noteButtonRow}>
                 <button

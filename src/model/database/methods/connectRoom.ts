@@ -1,61 +1,105 @@
-import { Room } from '../types';
+import { CollectionKey, Documents, RegistryData } from '../types';
 
 import { syncedStore, getYjsValue } from '@syncedstore/core';
 import * as Y from 'yjs';
-import { newMatrixProvider } from '../utils';
-import { Database, initialRegistryStore } from '..';
+import { newEmptyRoom, newMatrixProvider } from '../utils';
+import { Database } from '..';
 
 /** make sure to query the current collection to make sure the passed room's id and alias are correct.  */
 export const connectRoom = (_db: Database) =>
   function <T>(
-    room: Room<T>,
-    /** Only pass this when creating the registry itself */
-    registryConnect?: true
+    roomAlias: string,
+    collectionKey: CollectionKey,
+    registryStore?: {
+      documents: Documents<RegistryData>;
+    }
   ) {
     return new Promise<boolean>((resolve, reject) => {
       try {
-        _db.collections[room.collectionKey][room._id].connectStatus = 'loading';
+        const registryConnect = collectionKey === CollectionKey.registry;
+        /** the internal room alias of the registry is always 0, so that you don't need to always `buildRoomAlias` to find it */
+        const dbAlias = registryConnect ? 0 : roomAlias;
 
-        const roomAlias = room.roomAlias;
-        if (!roomAlias) {
-          throw new Error("can't connect without roomAlias");
+        if (!_db.collections[collectionKey][dbAlias]) {
+          //@ts-ignore
+          _db.collections[collectionKey][dbAlias] = newEmptyRoom<T>(
+            collectionKey,
+            roomAlias
+          );
         }
+        const room = _db.collections[collectionKey][dbAlias];
+        if (!room) {
+          throw new Error('room not found');
+        }
+
+        room.connectStatus = 'loading';
         if (!_db.matrixClient) {
           throw new Error("can't connect without matrixClient");
         }
         const store = syncedStore({ documents: {} });
         const doc = getYjsValue(store) as Y.Doc;
-
         // todo: do we also need to register the localStorage provider here too?
-
         room.matrixProvider = newMatrixProvider({
           doc,
           matrixClient: _db.matrixClient,
           roomAlias,
         });
-
+        room.matrixProvider.initialize().then((result) => {
+          // console.log('initialize result', result);
+        });
+        // room.matrixProvider?.onReceivedEvents((events) => {
+        //   // console.log('onReceivedEvents', events);
+        // });
+        // room.matrixProvider?.onCanWriteChanged((canWrite) => {
+        //   // console.log('canWrite', canWrite);
+        //   // resolve(true);
+        // });
         // connect or fail callbacks:
-        room.matrixProvider?.onDocumentAvailable(async (e) => {
-          _db.collections[room.collectionKey][room._id].doc = doc;
-          _db.collections[room.collectionKey][room._id].store = store;
+        room.matrixProvider?.onDocumentAvailable((e) => {
+          room.doc = doc;
+          room.store = store;
 
-          if (!registryConnect) {
+          if (
+            !registryConnect &&
+            registryStore &&
+            !registryStore?.documents[0].notes[roomAlias]
+          ) {
             // register room in registry
-            _db.collections.registry[0].store.documents[0][room.collectionKey][
-              room._id
-            ] = {
+            // could consider moving this to createRoom, problem is createRoom doesn't have access to the registryStore
+            console.log('registering room in registry', roomAlias);
+            registryStore.documents[0][room.collectionKey][roomAlias] = {
               roomAlias,
-              roomId: room._id,
             };
+
+            // TODO: set these in registry.
+            const setRoomNameAndId = async () => {
+              const roomId = await _db.matrixClient?.getRoomIdForAlias(
+                room.roomAlias
+              );
+              if (roomId?.room_id && _db.matrixClient) {
+                const roomRes = await _db.matrixClient?.getRoomSummary(
+                  roomId?.room_id
+                );
+                console.log({ roomRes });
+
+                if (roomRes && roomRes.name) {
+                  const roomName = roomRes.name;
+                  if (roomName) {
+                    room.name = roomName;
+                  }
+                } else {
+                  const room2Res = await _db.matrixClient?.getRooms();
+                  console.log({ room2Res });
+                }
+              }
+            };
+            setRoomNameAndId();
           }
 
-          if (registryConnect) {
-            // set initial registry
-            _db.collections.registry[0].store.documents[0] =
-              initialRegistryStore.documents[0];
-          }
           if (_db.onRoomConnectStatusUpdate)
-            _db.onRoomConnectStatusUpdate('ok', room.collectionKey, room._id);
+            _db.onRoomConnectStatusUpdate('ok', room.collectionKey, roomAlias);
+          room.connectStatus = 'ok';
+
           resolve(true);
         });
 
@@ -64,17 +108,24 @@ export const connectRoom = (_db: Database) =>
             _db.onRoomConnectStatusUpdate(
               'failed',
               room.collectionKey,
-              room._id
+              roomAlias
             );
-          _db.collections[room.collectionKey][room._id].connectStatus =
-            'failed';
-          reject(new Error('onDocumentUnavailable'));
+          room.connectStatus = 'failed';
+          reject('onDocumentUnavailable');
         });
       } catch (error) {
+        console.log('connectRoom error', error);
         console.error(error);
-        if (_db.onRoomConnectStatusUpdate)
-          _db.onRoomConnectStatusUpdate('failed', room.collectionKey, room._id);
-        _db.collections[room.collectionKey][room._id].connectStatus = 'failed';
+        const room = _db.collections[collectionKey][roomAlias];
+        if (room && _db.onRoomConnectStatusUpdate)
+          _db.onRoomConnectStatusUpdate(
+            'failed',
+            room.collectionKey,
+            room.roomAlias
+          );
+        if (room)
+          _db.collections[room.collectionKey][room.roomAlias].connectStatus =
+            'failed';
         reject(error);
       }
     });

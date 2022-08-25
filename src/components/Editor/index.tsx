@@ -1,24 +1,51 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 import styles from './Editor.module.scss';
 import { NotesContext } from 'components/notes/NotesContext';
+import { NotesAppContext } from 'components/notes/NotesApp';
 
 const Editor = dynamic(() => import('./MilkdownEditor'), { ssr: false });
 
 export type OnEditorChange = (markdown: string) => void;
 
-const MarkDownEditor: React.FC<{ readOnly?: boolean; content?: string }> = (
-  props
-) => {
-  const { onChange, noteText } = useContext(NotesContext);
+const MarkDownEditor: React.FC<{
+  readOnly?: boolean;
+  content?: string;
+  selectedNoteId?: string;
+}> = (props) => {
+  const { notes, mostRecentNote } = useContext(NotesContext);
+  const { selectedNoteId } = useContext(NotesAppContext);
+
+  const selectedNote = selectedNoteId ? selectedNoteId : mostRecentNote;
+
+  const [noteText, setNoteText] = useState(
+    notes ? notes[selectedNote]?.text : ''
+  );
+
+  useEffect(() => {
+    setNoteText(notes ? notes[selectedNote]?.text : '');
+  }, [selectedNote, notes]);
+
+  const onChange = useCallback(
+    (markdown: string) => {
+      if (notes && notes[selectedNote]) {
+        notes[selectedNote].text = markdown;
+        notes[selectedNote]._updated = new Date().getTime();
+      }
+    },
+    [notes, selectedNote]
+  );
+
   return (
     <div className={styles.root}>
-      <Editor
-        onChange={onChange}
-        content={props.content ?? noteText}
-        readOnly={props.readOnly}
-      />
+      {notes && noteText && (
+        <Editor
+          onChange={onChange}
+          content={props.content ?? noteText}
+          readOnly={props.readOnly}
+        />
+      )}
     </div>
   );
 };
