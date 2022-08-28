@@ -1,5 +1,5 @@
 import sdk, { ICreateClientOpts, MatrixClient } from 'matrix-js-sdk';
-import { MatrixProvider } from 'matrix-crdt';
+import { MatrixProvider } from '@jacobcoro/matrix-crdt';
 import * as Y from 'yjs';
 import { CollectionKey, Room } from './types';
 import { Database } from '.';

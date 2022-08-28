@@ -1,4 +1,4 @@
-import { MatrixProvider } from 'matrix-crdt';
+import { MatrixProvider } from '@jacobcoro/matrix-crdt';
 import * as Y from 'yjs';
 import { CollectionKey } from './collections';
 export type { Collections } from './collections';
