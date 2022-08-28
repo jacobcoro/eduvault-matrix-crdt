@@ -16,7 +16,6 @@ const Login = () => {
   const router = useRouter();
   const { login } = useContext(StoreContext);
   const initialLoginData: LoginData = {
-    // TODO: create room
     baseUrl: MATRIX_SERVER,
     userId: DEV_USERNAME, // these will be empty in prod. This speeds up dev time
     password: DEV_PASSWORD,
