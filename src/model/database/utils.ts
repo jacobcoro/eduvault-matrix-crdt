@@ -107,6 +107,7 @@ export const getOrCreateRegistry = async (
   _db: Database
 ) => {
   const userId = matrixClient.getUserId();
+  if (!userId) throw new Error('userId not found');
   const space = await getOrCreateSpace(matrixClient, userId);
   // console.log({ space });
   const registryRoomAlias = buildRegistryRoomAlias(userId);
@@ -275,6 +276,7 @@ const registerRoomToSpace = async (
   roomId: string
 ) => {
   const userId = matrixClient.getUserId();
+  if (!userId) throw new Error('userId not found');
   const spaceAlias = buildSpaceRoomAlias(userId);
   const spaceIdRes = await matrixClient.getRoomIdForAlias(spaceAlias);
   if (!spaceIdRes) throw new Error('space not found');

@@ -29,7 +29,9 @@ export const createAndConnectRoom =
     try {
       if (!_db.matrixClient)
         throw new Error("can't create room without matrixClient");
-      const newRoomAlias = buildRoomAlias(alias, _db.matrixClient.getUserId());
+      const userId = _db.matrixClient.getUserId();
+      if (!userId) throw new Error('userId not found');
+      const newRoomAlias = buildRoomAlias(alias, userId);
       const newRoomAliasTruncated = truncateRoomAlias(newRoomAlias);
       try {
         const createRoomResult = await createRoom(
