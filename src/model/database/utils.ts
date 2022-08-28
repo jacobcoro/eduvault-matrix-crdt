@@ -190,6 +190,7 @@ export async function createMatrixClient(data: LoginData) {
 export const newMatrixProvider = ({
   matrixClient,
   doc,
+  /** full room alias with #name:host */
   roomAlias,
 }: {
   matrixClient: MatrixClient;
